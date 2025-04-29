@@ -14,6 +14,8 @@ public class JobBoardContext : DbContext
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Resume> Resumes => Set<Resume>();
     public DbSet<Company> Companies => Set<Company>();
+    public DbSet<Study> Studies { get; set; }
+    public DbSet<Experience> Experiences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,5 +52,15 @@ public class JobBoardContext : DbContext
             .HasOne(r => r.User)
             .WithOne()
             .HasForeignKey<Resume>(r => r.UserId);
+
+        modelBuilder.Entity<Study>()
+            .HasOne(s => s.User)
+            .WithMany(u => u.Studies)
+            .HasForeignKey(s => s.UserId);
+
+        modelBuilder.Entity<Experience>()
+            .HasOne(e => e.User)
+            .WithMany(u => u.Experiences)
+            .HasForeignKey(e => e.UserId);
     }
 }
