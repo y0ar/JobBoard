@@ -5,62 +5,54 @@ namespace JobBoard.Data;
 
 public class JobBoardContext : DbContext
 {
-    public JobBoardContext(DbContextOptions<JobBoardContext> options)
-        : base(options) {}
+    public JobBoardContext(DbContextOptions<JobBoardContext> options) : base(options) { }
 
-    public DbSet<Job> Jobs => Set<Job>();
     public DbSet<User> Users => Set<User>();
-    public DbSet<Application> Applications => Set<Application>();
-    public DbSet<Category> Categories => Set<Category>();
-    public DbSet<Resume> Resumes => Set<Resume>();
+    public DbSet<Candidate> Candidates => Set<Candidate>();
+    public DbSet<Administrator> Administrators => Set<Administrator>();
     public DbSet<Company> Companies => Set<Company>();
-    public DbSet<Study> Studies { get; set; }
-    public DbSet<Experience> Experiences { get; set; }
+    public DbSet<Job> Jobs => Set<Job>();
+    public DbSet<JobAlert> JobAlerts => Set<JobAlert>();
+    public DbSet<Application> Applications => Set<Application>();
+    public DbSet<Study> Studies => Set<Study>();
+    public DbSet<Experience> Experiences => Set<Experience>();
+    public DbSet<Skill> Skills => Set<Skill>();
+    public DbSet<Language> Languages => Set<Language>();
+    public DbSet<Document> Documents => Set<Document>();
+    public DbSet<Evaluation> Evaluations => Set<Evaluation>();
+    public DbSet<Interview> Interviews => Set<Interview>();
+    public DbSet<Resume> Resumes => Set<Resume>();
+    public DbSet<Statistic> Statistics => Set<Statistic>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Application: User - Job many-to-many via Applications
-        modelBuilder.Entity<Application>()
-            .HasOne(a => a.User)
-            .WithMany()
-            .HasForeignKey(a => a.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<User>().HasDiscriminator<string>("UserType")
+            .HasValue<User>("User")
+            .HasValue<Candidate>("Candidate")
+            .HasValue<Administrator>("Administrator");
+
+        modelBuilder.Entity<Candidate>()
+            .HasOne(c => c.Resume)
+            .WithOne(r => r.Candidate)
+            .HasForeignKey<Resume>(r => r.CandidateId);
 
         modelBuilder.Entity<Application>()
-            .HasOne(a => a.Job)
-            .WithMany()
-            .HasForeignKey(a => a.JobId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasMany(a => a.Evaluations)
+            .WithOne(e => e.Application)
+            .HasForeignKey(e => e.ApplicationId);
 
-        // Job - Category
-        modelBuilder.Entity<Job>()
-            .HasOne(j => j.Category)
-            .WithMany(c => c.Jobs)
-            .HasForeignKey(j => j.CategoryId);
+        modelBuilder.Entity<Application>()
+            .HasMany(a => a.Interviews)
+            .WithOne(i => i.Application)
+            .HasForeignKey(i => i.ApplicationId);
 
-        // Job - Company
-        modelBuilder.Entity<Job>()
-            .HasOne(j => j.Company)
-            .WithMany(c => c.Jobs)
-            .HasForeignKey(j => j.CompanyId)
-            .OnDelete(DeleteBehavior.SetNull);
-
-        // User - Resume (1-to-1)
-        modelBuilder.Entity<Resume>()
-            .HasOne(r => r.User)
-            .WithOne()
-            .HasForeignKey<Resume>(r => r.UserId);
-
-        modelBuilder.Entity<Study>()
-            .HasOne(s => s.User)
-            .WithMany(u => u.Studies)
-            .HasForeignKey(s => s.UserId);
-
-        modelBuilder.Entity<Experience>()
-            .HasOne(e => e.User)
-            .WithMany(u => u.Experiences)
-            .HasForeignKey(e => e.UserId);
+        modelBuilder.Entity<Administrator>()
+            .HasMany(a => a.Statistics)
+            .WithOne(s => s.Administrator)
+            .HasForeignKey(s => s.AdministratorId);
     }
+
+public DbSet<JobBoard.Models.Recruiter> Recruiter { get; set; } = default!;
 }

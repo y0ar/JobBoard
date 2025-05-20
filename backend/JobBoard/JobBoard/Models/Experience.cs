@@ -1,24 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace JobBoard.Models;
 
-namespace JobBoard.Models
+public class Experience
 {
-    public class Experience
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public string Position { get; set; } = string.Empty;
+    public string CompanyName { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+    public DateTime StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
 
-        [Required]
-        public string Position { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
 
-        [Required]
-        public string CompanyName { get; set; } = string.Empty;
-
-        public DateTime StartDate { get; set; }
-
-        public DateTime? EndDate { get; set; }
-
-        public string? Description { get; set; }
-
-        public int UserId { get; set; }
-        public User? User { get; set; }
-    }
+    public int CandidateId { get; set; }
+    public Candidate? Candidate { get; set; }
 }

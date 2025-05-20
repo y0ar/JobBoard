@@ -6,16 +6,14 @@ public class Job
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Location { get; set; } = string.Empty;
-    
-    public string EmploymentType { get; set; } = string.Empty; // e.g., Full-Time, Part-Time
-    public DateTime PostedDate { get; set; } = DateTime.UtcNow;
+    public string RequiredEducationLevel { get; set; } = string.Empty;
+    public string RequiredSkills { get; set; } = string.Empty;
 
-    public int? UserId { get; set; } // Poster (optional for now)
-    public User? User { get; set; }
-    
-    public int CategoryId { get; set; }
-    public Category? Category { get; set; }
+    public DateTime PublicationDate { get; set; }
+    public DateTime ExpirationDate { get; set; }
 
-    public int? CompanyId { get; set; }
+    public int CompanyId { get; set; }
     public Company? Company { get; set; }
+
+    public ICollection<Application> Applications { get; set; } = new List<Application>();
 }

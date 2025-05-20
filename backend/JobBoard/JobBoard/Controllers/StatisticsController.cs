@@ -12,47 +12,47 @@ namespace JobBoard.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesController : ControllerBase
+    public class StatisticsController : ControllerBase
     {
         private readonly JobBoardContext _context;
 
-        public CategoriesController(JobBoardContext context)
+        public StatisticsController(JobBoardContext context)
         {
             _context = context;
         }
 
-        // GET: api/Categories
+        // GET: api/Statistics
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<Statistic>>> GetStatistics()
         {
-            return await _context.Categories.ToListAsync();
+            return await _context.Statistics.ToListAsync();
         }
 
-        // GET: api/Categories/5
+        // GET: api/Statistics/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(int id)
+        public async Task<ActionResult<Statistic>> GetStatistic(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var statistic = await _context.Statistics.FindAsync(id);
 
-            if (category == null)
+            if (statistic == null)
             {
                 return NotFound();
             }
 
-            return category;
+            return statistic;
         }
 
-        // PUT: api/Categories/5
+        // PUT: api/Statistics/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public async Task<IActionResult> PutStatistic(int id, Statistic statistic)
         {
-            if (id != category.Id)
+            if (id != statistic.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(category).State = EntityState.Modified;
+            _context.Entry(statistic).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +60,7 @@ namespace JobBoard.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CategoryExists(id))
+                if (!StatisticExists(id))
                 {
                     return NotFound();
                 }
@@ -73,36 +73,36 @@ namespace JobBoard.Controllers
             return NoContent();
         }
 
-        // POST: api/Categories
+        // POST: api/Statistics
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory(Category category)
+        public async Task<ActionResult<Statistic>> PostStatistic(Statistic statistic)
         {
-            _context.Categories.Add(category);
+            _context.Statistics.Add(statistic);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCategory", new { id = category.Id }, category);
+            return CreatedAtAction("GetStatistic", new { id = statistic.Id }, statistic);
         }
 
-        // DELETE: api/Categories/5
+        // DELETE: api/Statistics/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(int id)
+        public async Task<IActionResult> DeleteStatistic(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
+            var statistic = await _context.Statistics.FindAsync(id);
+            if (statistic == null)
             {
                 return NotFound();
             }
 
-            _context.Categories.Remove(category);
+            _context.Statistics.Remove(statistic);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool CategoryExists(int id)
+        private bool StatisticExists(int id)
         {
-            return _context.Categories.Any(e => e.Id == id);
+            return _context.Statistics.Any(e => e.Id == id);
         }
     }
 }
