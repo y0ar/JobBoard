@@ -5,7 +5,12 @@ import AddJob from './pages/AddJob';
 import JobDetails from './pages/JobDetails';
 import NotFound from './pages/NotFound';
 
-export default function App() {
+const Companies = () => <div>Companies Page</div>;
+const About = () => <div>About Page</div>;
+const Login = () => <div>Login Page</div>;
+const Register = () => <div>Register Page</div>;
+
+function App() {
   return (
     <Router>
       <Routes>
@@ -13,9 +18,15 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="add-job" element={<AddJob />} />
           <Route path="jobs/:id" element={<JobDetails />} />
+          <Route path="companies" element={<Companies />} />
+          <Route path="about" element={<About />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </Router>
   );
 }
+
+export default App;
