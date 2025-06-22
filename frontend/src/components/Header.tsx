@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Plus, LogIn, UserPlus, Briefcase } from 'lucide-react';
+import { Plus, LogIn, UserPlus, Briefcase } from 'lucide-react';
 
 interface HeaderProps {
   onAddJob: () => void;
