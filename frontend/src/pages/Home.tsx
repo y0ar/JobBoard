@@ -52,7 +52,7 @@ export default function Home() {
   };
 
   const handleJobClick = (job: Job) => {
-    navigate(`/job/${job.id}`);
+    navigate(`/jobs/${job.id}`);
   };
 
   return (

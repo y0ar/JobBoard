@@ -263,7 +263,7 @@ export const JobDetails: React.FC = () => {
                   {mockJobs.filter(j => j.id !== job.id).slice(0, 3).map((similarJob) => (
                     <Link
                       key={similarJob.id}
-                      to={`/job/${similarJob.id}`}
+                      to={`/jobs/${similarJob.id}`}
                       className="block p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors duration-200"
                     >
                       <div className="font-medium text-gray-900 mb-1">{similarJob.title}</div>
