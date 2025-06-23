@@ -4,11 +4,11 @@ import Home from './pages/Home';
 import AddJob from './pages/AddJob';
 import JobDetails from './pages/JobDetails';
 import NotFound from './pages/NotFound';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 const Companies = () => <div>Companies Page</div>;
 const About = () => <div>About Page</div>;
-const Login = () => <div>Login Page</div>;
-const Register = () => <div>Register Page</div>;
 
 function App() {
   return (

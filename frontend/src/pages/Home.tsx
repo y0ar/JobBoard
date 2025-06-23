@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
 import { JobCard } from '../components/JobCard';
 import type { Job } from '../types';
 import { getAllJobs } from '../services/jobService';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -50,8 +52,7 @@ export default function Home() {
   };
 
   const handleJobClick = (job: Job) => {
-    console.log('Job clicked:', job);
-    // TODO: Navigate to job details page
+    navigate(`/job/${job.id}`);
   };
 
   return (
