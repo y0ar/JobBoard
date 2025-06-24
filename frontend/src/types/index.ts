@@ -5,9 +5,15 @@ export interface User {
   lastName: string;
   email: string;
   password: string;
-  phoneNumber: string;
-  address: string;
+  //address: string;
   userType: string;
+}
+
+export interface Recruiter extends User {
+  phoneNumber: string;
+  department: string;
+  companyId: number;
+  company?: Company;
 }
 
 export interface Candidate extends User {
