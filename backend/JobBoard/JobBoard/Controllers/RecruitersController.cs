@@ -25,14 +25,14 @@ namespace JobBoard.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Recruiter>>> GetRecruiter()
         {
-            return await _context.Recruiter.ToListAsync();
+            return await _context.Recruiters.ToListAsync();
         }
 
         // GET: api/Recruiters/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Recruiter>> GetRecruiter(int id)
         {
-            var recruiter = await _context.Recruiter.FindAsync(id);
+            var recruiter = await _context.Recruiters.FindAsync(id);
 
             if (recruiter == null)
             {
@@ -78,7 +78,7 @@ namespace JobBoard.Controllers
         [HttpPost]
         public async Task<ActionResult<Recruiter>> PostRecruiter(Recruiter recruiter)
         {
-            _context.Recruiter.Add(recruiter);
+            _context.Recruiters.Add(recruiter);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRecruiter", new { id = recruiter.Id }, recruiter);
@@ -88,13 +88,13 @@ namespace JobBoard.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecruiter(int id)
         {
-            var recruiter = await _context.Recruiter.FindAsync(id);
+            var recruiter = await _context.Recruiters.FindAsync(id);
             if (recruiter == null)
             {
                 return NotFound();
             }
 
-            _context.Recruiter.Remove(recruiter);
+            _context.Recruiters.Remove(recruiter);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -102,7 +102,7 @@ namespace JobBoard.Controllers
 
         private bool RecruiterExists(int id)
         {
-            return _context.Recruiter.Any(e => e.Id == id);
+            return _context.Recruiters.Any(e => e.Id == id);
         }
     }
 }

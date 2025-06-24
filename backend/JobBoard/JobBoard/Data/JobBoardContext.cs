@@ -10,6 +10,8 @@ public class JobBoardContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Candidate> Candidates => Set<Candidate>();
     public DbSet<Administrator> Administrators => Set<Administrator>();
+    public DbSet<Recruiter> Recruiters => Set<Recruiter>();
+
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<Job> Jobs => Set<Job>();
     public DbSet<JobAlert> JobAlerts => Set<JobAlert>();
@@ -31,7 +33,14 @@ public class JobBoardContext : DbContext
         modelBuilder.Entity<User>().HasDiscriminator<string>("UserType")
             .HasValue<User>("User")
             .HasValue<Candidate>("Candidate")
-            .HasValue<Administrator>("Administrator");
+            .HasValue<Administrator>("Administrator")
+            .HasValue<Recruiter>("Recruiter");
+
+        modelBuilder.Entity<Recruiter>()
+            .HasOne(r => r.Company)
+            .WithMany()
+            .HasForeignKey(r => r.CompanyId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Candidate>()
             .HasOne(c => c.Resume)
@@ -53,6 +62,4 @@ public class JobBoardContext : DbContext
             .WithOne(s => s.Administrator)
             .HasForeignKey(s => s.AdministratorId);
     }
-
-public DbSet<JobBoard.Models.Recruiter> Recruiter { get; set; } = default!;
 }
