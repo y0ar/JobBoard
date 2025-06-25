@@ -1,7 +1,7 @@
 import axios from './axios';
-import type { Candidate, Recruiter, Administrator, User } from '../types';
+import type { User } from '../types';
 
-const ENDPOINT = '/users';
+// const ENDPOINT = '/users';
 
 export const registerUser = (user: Partial<User> & { userType: string }) => {
   switch (user.userType.toLowerCase()) {

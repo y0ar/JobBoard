@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, DollarSign, Calendar, Building2, Clock, Users, Send, Bookmark, Share2 } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, MapPin, DollarSign, Calendar, Building2, Users, Send, Bookmark, Share2 } from 'lucide-react';
 import { mockJobs } from '../services/mockJobs';
 import { getJobById } from '../services/jobService';
 import type { Job } from '../types';
 
 export const JobDetails: React.FC = () => {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);

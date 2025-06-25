@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { UserPlus, Mail, Lock, User, Phone, MapPin, Eye, EyeOff, Briefcase, Users } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, Phone, Eye, EyeOff, Briefcase, Users } from 'lucide-react';
+import { registerUser } from '../services/userService';
 
 export const Register: React.FC = () => {
   const [userType, setUserType] = useState<'candidate' | 'recruiter'>('candidate');
@@ -11,8 +12,9 @@ export const Register: React.FC = () => {
     password: '',
     confirmPassword: '',
     phoneNumber: '',
-    address: '',
+    department: '',
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,22 +28,29 @@ export const Register: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
+  e.preventDefault();
+
+  if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match');
       return;
-    }
+  }
 
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Registration attempt:', { ...formData, userType });
-      setIsLoading(false);
-      // TODO: Implement actual registration logic
+  setIsLoading(true);
+
+  try {
+      const payload = {
+          ...formData,
+          userType: userType.charAt(0).toUpperCase() + userType.slice(1), // 'Candidate' or 'Recruiter'
+      };
+
+      await registerUser(payload);
       navigate('/login');
-    }, 1000);
+      } catch (error) {
+          console.error('Registration failed:', error);
+          alert('Registration failed. Please try again.');
+      } finally {
+          setIsLoading(false);
+      }
   };
 
   return (
@@ -233,48 +242,48 @@ export const Register: React.FC = () => {
 
             {/* Contact Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+            {userType === 'recruiter' && (
+                <div>
                 <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
+                    Phone Number
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Phone className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
+                    </div>
+                    <input
                     id="phoneNumber"
                     name="phoneNumber"
                     type="tel"
-                    required
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
                     placeholder="+1 (555) 123-4567"
-                  />
+                    />
                 </div>
-              </div>
+                </div>
+            )}
 
-              <div>
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                  Address
+            {userType === 'recruiter' && (
+                <div className="md:col-span-2">
+                <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-2">
+                    Department
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MapPin className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="address"
-                    name="address"
+                    <input
+                    id="department"
+                    name="department"
                     type="text"
-                    required
-                    value={formData.address}
+                    value={formData.department}
                     onChange={handleInputChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                    placeholder="City, State"
-                  />
+                    className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                    placeholder="e.g. Human Resources"
+                    />
                 </div>
-              </div>
+                </div>
+            )}
             </div>
+
 
             {/* Terms and Conditions */}
             <div className="flex items-center">
