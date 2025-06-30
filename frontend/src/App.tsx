@@ -6,26 +6,29 @@ import JobDetails from './pages/JobDetails';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import { AuthProvider } from './contexts/AuthContext';
 
 const Companies = () => <div>Companies Page</div>;
 const About = () => <div>About Page</div>;
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="add-job" element={<AddJob />} />
-          <Route path="jobs/:id" element={<JobDetails />} />
-          <Route path="companies" element={<Companies />} />
-          <Route path="about" element={<About />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="add-job" element={<AddJob />} />
+            <Route path="jobs/:id" element={<JobDetails />} />
+            <Route path="companies" element={<Companies />} />
+            <Route path="about" element={<About />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, Eye, EyeOff, Briefcase } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import axios from '../services/axios';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -8,18 +10,22 @@ export const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Login attempt:', { email, password });
-      setIsLoading(false);
-      // TODO: Implement actual login logic
+
+    try {
+      const res = await axios.post('/auth/login', { email, password });
+      login(res.data);
       navigate('/');
-    }, 1000);
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Invalid email or password');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

@@ -1,7 +1,16 @@
-import { Plus, LogIn, UserPlus, Briefcase } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Plus, LogIn, UserPlus, Briefcase, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Header: React.FC = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <header className="bg-white shadow-lg border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,29 +38,46 @@ export const Header: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-3">
-            <Link
-              to="/add-job"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Post Job
-            </Link>
+            {user ? (
+              <>
+                <span className="text-sm text-gray-700">
+                  Hello, {user.firstName}!
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="inline-flex items-center px-4 py-2 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/add-job"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Post Job
+                </Link>
 
-            <Link
-              to="/login"
-              className="inline-flex items-center px-4 py-2 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
-            >
-              <LogIn className="h-4 w-4 mr-2" />
-              Login
-            </Link>
+                <Link
+                  to="/login"
+                  className="inline-flex items-center px-4 py-2 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login
+                </Link>
 
-            <Link
-              to="/register"
-              className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-sm"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Register
-            </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-sm"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
