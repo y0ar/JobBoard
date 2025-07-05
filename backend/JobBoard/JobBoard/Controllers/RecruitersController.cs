@@ -42,6 +42,23 @@ namespace JobBoard.Controllers
             return recruiter;
         }
 
+        // GET: api/Recruiters/5/applications
+        [HttpGet("{id}/applications")]
+        public async Task<ActionResult<IEnumerable<Application>>> GetApplicationsByRecruiterId(int id)
+        {
+            var jobs = await _context.Jobs.Where(j => j.CompanyId ==
+                _context.Recruiters.Where(r => r.Id == id)
+                .Select(r => r.CompanyId).FirstOrDefault()).Select(j => j.Id).ToListAsync();
+
+            var applications = await _context.Applications
+                .Include(a => a.Job)
+                .Include(a => a.Candidate)
+                .Where(a => jobs.Contains(a.JobId))
+                .ToListAsync();
+
+            return applications;
+        }
+
         // PUT: api/Recruiters/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

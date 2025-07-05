@@ -1,4 +1,4 @@
-import { Plus, LogIn, UserPlus, Briefcase, LogOut } from 'lucide-react';
+import { Plus, LogIn, UserPlus, Briefcase, LogOut, LayoutDashboard } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -10,6 +10,8 @@ export const Header: React.FC = () => {
     logout();
     navigate('/login');
   };
+
+  const isRecruiter = user?.userType?.toLowerCase() === 'recruiter';
 
   return (
     <header className="bg-white shadow-lg border-b border-gray-100">
@@ -28,9 +30,9 @@ export const Header: React.FC = () => {
             <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
               Jobs
             </Link>
-            <Link to="/companies" className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+            {/* <Link to="/companies" className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
               Companies
-            </Link>
+            </Link> */}
             <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
               About
             </Link>
@@ -43,6 +45,27 @@ export const Header: React.FC = () => {
                 <span className="text-sm text-gray-700">
                   Hello, {user.firstName}!
                 </span>
+
+                {/* Dashboard Link */}
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center px-4 py-2 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Link>
+
+                {/* Add Job (Recruiter) */}
+                {isRecruiter && (
+                  <Link
+                    to="/add-job"
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Post Job
+                  </Link>
+                )}
+
                 <button
                   onClick={handleLogout}
                   className="inline-flex items-center px-4 py-2 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
@@ -53,14 +76,6 @@ export const Header: React.FC = () => {
               </>
             ) : (
               <>
-                <Link
-                  to="/add-job"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Post Job
-                </Link>
-
                 <Link
                   to="/login"
                   className="inline-flex items-center px-4 py-2 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200"

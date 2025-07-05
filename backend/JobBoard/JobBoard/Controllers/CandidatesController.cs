@@ -42,6 +42,29 @@ namespace JobBoard.Controllers
             return candidate;
         }
 
+        [HttpGet("{id}/experiences")]
+        public async Task<ActionResult<IEnumerable<Experience>>> GetExperiencesByCandidateId(int id)
+        {
+            return await _context.Experiences.Where(e => e.CandidateId == id).ToListAsync();
+        }
+
+        // GET: api/Candidates/5/studies
+        [HttpGet("{id}/studies")]
+        public async Task<ActionResult<IEnumerable<Study>>> GetStudiesByCandidateId(int id)
+        {
+            return await _context.Studies.Where(s => s.CandidateId == id).ToListAsync();
+        }
+
+        // GET: api/Candidates/5/applications
+        [HttpGet("{id}/applications")]
+        public async Task<ActionResult<IEnumerable<Application>>> GetApplicationsByCandidateId(int id)
+        {
+            return await _context.Applications
+                .Include(a => a.Job)
+                .Where(a => a.CandidateId == id)
+                .ToListAsync();
+        }
+
         // PUT: api/Candidates/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

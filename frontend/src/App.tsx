@@ -6,6 +6,7 @@ import JobDetails from './pages/JobDetails';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './contexts/AuthContext';
 
 const Companies = () => <div>Companies Page</div>;
@@ -24,6 +25,7 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
