@@ -14,8 +14,6 @@ import {
   Calendar,
   MapPin,
   Building2,
-  Mail,
-  Phone,
   Save,
   X,
   CheckCircle,
@@ -23,9 +21,10 @@ import {
   XCircle,
   Users
 } from 'lucide-react';
-import { getCandidateById } from '../services/candidateService';
 import { getRecruiterById } from '../services/recruiterService';
-import { getExperiencesByCandidateId, getStudiesByCandidateId, getApplicationsByCandidateId } from '../services/candidateService';
+import { addStudy, deleteStudy } from '../services/studyService';
+import { addExperience, deleteExperience } from '../services/experienceService';
+import { updateCandidate, getCandidateById, getExperiencesByCandidateId, getStudiesByCandidateId, getApplicationsByCandidateId } from '../services/candidateService';
 import { getApplicationsByRecruiterId } from '../services/recruiterService';
 import { getAllJobs } from '../services/jobService';
 import { useAuth } from '../contexts/AuthContext';
@@ -100,69 +99,109 @@ export const Dashboard: React.FC = () => {
   }, [userType]);
 
 
-  const handleProfileSave = () => {
-    if (!candidate) return;
-    setCandidate({
+  const handleProfileSave = async () => {
+  if (!candidate) return;
+
+  try {
+    const updatedCandidate: Candidate = {
       ...candidate,
       firstName: profileForm.firstName,
       lastName: profileForm.lastName,
       email: profileForm.email
-    });
+    };
+
+    const response = await updateCandidate(candidate.id, updatedCandidate);
+
+    setCandidate(response.data); // Use updated version from backend
     setIsEditing(false);
+    } catch (error) {
+        console.error('Failed to update candidate profile:', error);
+    }
   };
 
-  const handleAddExperience = () => {
-    if (!candidate || !newExperience.position || !newExperience.company || !newExperience.startDate) return;
-    const experience: Experience = {
-      id: Date.now(),
-      position: newExperience.position!,
-      company: newExperience.company!,
-      startDate: newExperience.startDate!,
+
+  const handleAddExperience = async () => {
+  if (!candidate || !newExperience.position || !newExperience.company || !newExperience.startDate) return;
+
+  try {
+    const experienceToAdd: Omit<Experience, 'id'> = {
+      position: newExperience.position,
+      company: newExperience.company,
+      startDate: newExperience.startDate,
       endDate: newExperience.endDate || '',
       description: newExperience.description || '',
       candidateId: candidate.id
     };
+
+    const response = await addExperience(experienceToAdd);
+
     setCandidate({
       ...candidate,
-      experiences: [...(candidate.experiences || []), experience]
+      experiences: [...(candidate.experiences || []), response.data]
     });
+
     setNewExperience({ position: '', company: '', startDate: '', endDate: '', description: '' });
     setShowAddExperience(false);
+    } catch (error) {
+        console.error('Failed to save experience:', error);
+    }
   };
 
-  const handleAddStudy = () => {
-    if (!candidate || !newStudy.degree || !newStudy.institution || !newStudy.startDate) return;
-    const study: Study = {
-      id: Date.now(),
-      degree: newStudy.degree!,
-      institution: newStudy.institution!,
-      startDate: newStudy.startDate!,
+  const handleAddStudy = async () => {
+  if (!candidate || !newStudy.degree || !newStudy.institution || !newStudy.startDate) return;
+
+  try {
+    const studyToAdd: Omit<Study, 'id'> = {
+      degree: newStudy.degree,
+      institution: newStudy.institution,
+      startDate: newStudy.startDate,
       endDate: newStudy.endDate || '',
       candidateId: candidate.id
     };
+
+    const response = await addStudy(studyToAdd);
+
     setCandidate({
       ...candidate,
-      studies: [...(candidate.studies || []), study]
+      studies: [...(candidate.studies || []), response.data]
     });
+
     setNewStudy({ degree: '', institution: '', startDate: '', endDate: '' });
     setShowAddStudy(false);
-  };
+  } catch (error) {
+    console.error('Failed to save study:', error);
+  }
+};
 
-  const handleDeleteExperience = (id: number) => {
-    if (!candidate) return;
+
+  const handleDeleteExperience = async (id: number) => {
+  if (!candidate) return;
+
+  try {
+    await deleteExperience(id);
     setCandidate({
       ...candidate,
       experiences: candidate.experiences.filter(exp => exp.id !== id)
     });
+    } catch (error) {
+        console.error('Failed to delete experience:', error);
+    }
   };
 
-  const handleDeleteStudy = (id: number) => {
-    if (!candidate) return;
+  const handleDeleteStudy = async (id: number) => {
+  if (!candidate) return;
+
+  try {
+    await deleteStudy(id);
     setCandidate({
       ...candidate,
       studies: candidate.studies.filter(study => study.id !== id)
     });
+    } catch (error) {
+        console.error('Failed to delete study:', error);
+    }
   };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -184,20 +223,20 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  const candidateTabs = [
-    { id: 'profile', label: 'Profile Settings', icon: Settings },
-    { id: 'resume', label: 'Resume', icon: FileText },
-    { id: 'applications', label: 'My Applications', icon: Briefcase },
-    { id: 'experience', label: 'Experience & Education', icon: GraduationCap },
-  ];
+//   const candidateTabs = [
+//     { id: 'profile', label: 'Profile Settings', icon: Settings },
+//     { id: 'resume', label: 'Resume', icon: FileText },
+//     { id: 'applications', label: 'My Applications', icon: Briefcase },
+//     { id: 'experience', label: 'Experience & Education', icon: GraduationCap },
+//   ];
 
-  const recruiterTabs = [
-    { id: 'profile', label: 'Profile Settings', icon: Settings },
-    { id: 'jobs', label: 'My Job Posts', icon: Briefcase },
-    { id: 'applicants', label: 'Applicants', icon: Users },
-  ];
+//   const recruiterTabs = [
+//     { id: 'profile', label: 'Profile Settings', icon: Settings },
+//     { id: 'jobs', label: 'My Job Posts', icon: Briefcase },
+//     { id: 'applicants', label: 'Applicants', icon: Users },
+//   ];
 
-  const tabs = userType === 'candidate' ? candidateTabs : recruiterTabs;
+//   const tabs = userType === 'candidate' ? candidateTabs : recruiterTabs;
 
   const renderCandidateContent = () => {
     switch (activeTab) {

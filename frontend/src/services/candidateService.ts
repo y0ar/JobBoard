@@ -11,6 +11,9 @@ export const getCandidateById = (id: number) => axios.get<Candidate>(`${ENDPOINT
 export const addCandidate = (candidate: Omit<Candidate, 'id'>) =>
   axios.post<Candidate>(ENDPOINT, candidate);
 
+export const updateCandidate = (id: number, candidate: Candidate) =>
+  axios.put<Candidate>(`${ENDPOINT}/${id}`, candidate);
+
 export const getExperiencesByCandidateId = async (candidateId: number): Promise<Experience[]> => {
   const res = await axios.get(`${ENDPOINT}/${candidateId}/experiences`);
   return res.data;

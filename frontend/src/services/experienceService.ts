@@ -9,3 +9,6 @@ export const getExperienceById = (id: number) => axios.get<Experience>(`${ENDPOI
 
 export const addExperience = (experience: Omit<Experience, 'id'>) =>
   axios.post<Experience>(ENDPOINT, experience);
+
+export const deleteExperience = (id: number) =>
+  axios.delete(`${ENDPOINT}/${id}`);
