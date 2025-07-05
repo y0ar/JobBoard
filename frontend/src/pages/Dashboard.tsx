@@ -387,7 +387,7 @@ export const Dashboard: React.FC = () => {
                         <span className="ml-1 capitalize">{application.status}</span>
                       </span>
                       <button
-                        onClick={() => navigate(`/job/${application.jobId}`)}
+                        onClick={() => navigate(`/jobs/${application.jobId}`)}
                         className="inline-flex items-center px-3 py-1 text-blue-600 hover:text-blue-700 transition-colors duration-200"
                       >
                         <Eye className="h-4 w-4 mr-1" />

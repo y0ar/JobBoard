@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, DollarSign, Calendar, Building2, Users, Send, Bookmark, Share2 } from 'lucide-react';
+import { ArrowLeft, MapPin, DollarSign, Calendar, Building2, Users, Send } from 'lucide-react';
 import { mockJobs } from '../services/mockJobs';
 import { getJobById } from '../services/jobService';
+import { useAuth } from '../contexts/AuthContext';
+import { addApplication } from '../services/applicationService';
 import type { Job } from '../types';
 
 export const JobDetails: React.FC = () => {
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,19 +78,25 @@ export const JobDetails: React.FC = () => {
     });
   };
 
-  const handleApply = () => {
-    console.log('Apply to job:', job.id);
-    // TODO: Implement job application logic
-  };
+  const handleApply = async () => {
+  if (!user || !job) return;
 
-  const handleSave = () => {
-    console.log('Save job:', job.id);
-    // TODO: Implement save job logic
-  };
+  try {
+    await addApplication({
+      candidateId: user.id,
+      jobId: job.id,
+      status: 'pending',
+      applicationDate: new Date().toISOString(),
+      documents: [],
+      evaluations: [],
+      interviews: []
+    });
 
-  const handleShare = () => {
-    console.log('Share job:', job.id);
-    // TODO: Implement share job logic
+    alert('Application submitted successfully!');
+    } catch (error) {
+      console.error('Failed to apply to job:', error);
+      alert('Failed to apply. Please try again.');
+    }
   };
 
   return (
@@ -147,7 +156,7 @@ export const JobDetails: React.FC = () => {
                   <Send className="h-5 w-5 mr-2" />
                   Apply Now
                 </button>
-                <div className="flex space-x-2">
+                {/* <div className="flex space-x-2">
                   <button
                     onClick={handleSave}
                     className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200"
@@ -162,7 +171,7 @@ export const JobDetails: React.FC = () => {
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

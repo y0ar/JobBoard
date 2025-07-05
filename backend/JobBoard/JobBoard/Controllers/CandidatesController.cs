@@ -59,10 +59,32 @@ namespace JobBoard.Controllers
         [HttpGet("{id}/applications")]
         public async Task<ActionResult<IEnumerable<Application>>> GetApplicationsByCandidateId(int id)
         {
-            return await _context.Applications
+            var applications = await _context.Applications
                 .Include(a => a.Job)
-                .Where(a => a.CandidateId == id)
+                .Include(a => a.Candidate)
+                .Select(a => new Application
+                {
+                    Id = a.Id,
+                    Status = a.Status,
+                    ApplicationDate = a.ApplicationDate,
+                    CandidateId = a.CandidateId,
+                    JobId = a.JobId,
+                    Candidate = new Candidate
+                    {
+                        Id = a.Candidate.Id,
+                        FirstName = a.Candidate.FirstName,
+                        LastName = a.Candidate.LastName
+                    },
+                    Job = new Job
+                    {
+                        Id = a.Job.Id,
+                        Title = a.Job.Title,
+                        CompanyId = a.Job.CompanyId
+                    }
+                })
                 .ToListAsync();
+
+            return applications;
         }
 
         // PUT: api/Candidates/5
