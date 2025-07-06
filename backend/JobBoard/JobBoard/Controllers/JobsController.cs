@@ -32,7 +32,29 @@ namespace JobBoard.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Job>> GetJob(int id)
         {
-            var job = await _context.Jobs.FindAsync(id);
+            var job = await _context.Jobs
+                .Include(j => j.Applications)
+                .Select(j => new Job
+                {
+                    Id = j.Id,
+                    CompanyId = j.CompanyId,
+                    Title = j.Title,
+                    Description = j.Description,
+                    Location = j.Location,
+                    PublicationDate = j.PublicationDate,
+                    ExpirationDate = j.ExpirationDate,
+                    RequiredEducationLevel = j.RequiredEducationLevel,
+                    RequiredSkills = j.RequiredSkills,
+                    Applications = j.Applications.Select(a => new Application
+                    {
+                        Id = a.Id,
+                        CandidateId = a.CandidateId,
+                        JobId = a.JobId,
+                        ApplicationDate = a.ApplicationDate,
+                        Status = a.Status,
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync(j => j.Id == id);
 
             if (job == null)
             {

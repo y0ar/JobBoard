@@ -14,14 +14,23 @@ export const JobDetails: React.FC = () => {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
+  if (!id) return;
 
-    const fetchJob = async () => {
+  const fetchJob = async () => {
     try {
       const response = await getJobById(parseInt(id));
       setJob(response.data);
+
+      if (user && user.userType.toLowerCase() === 'candidate') {
+        const existingApplication = response.data.applications?.some(
+          (app: any) => app.candidateId === user.id
+        );
+        setHasApplied(existingApplication);
+      }
+
     } catch (err) {
       console.error(err);
       setError(true);
@@ -31,7 +40,8 @@ export const JobDetails: React.FC = () => {
   };
 
     fetchJob();
-  }, [id]);
+  }, [id, user]);
+
 
 
   if (loading) {
@@ -86,7 +96,7 @@ export const JobDetails: React.FC = () => {
   }
 
   if (user.userType.toLowerCase() === 'recruiter') {
-    return; // Do nothing for recruiters
+    return;
   }
 
   if (!job) return;
@@ -101,6 +111,7 @@ export const JobDetails: React.FC = () => {
       evaluations: [],
       interviews: [],
     });
+    setHasApplied(true);
 
     alert('Application submitted successfully!');
     } catch (error) {
@@ -159,15 +170,21 @@ export const JobDetails: React.FC = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-col space-y-3 lg:ml-8">
-                {(!user || user.userType.toLowerCase() === 'candidate') && (
+                {user?.userType.toLowerCase() === 'candidate' && (
                   <button
                     onClick={handleApply}
-                    className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg hover:shadow-xl"
+                    disabled={hasApplied}
+                    className={`inline-flex items-center justify-center px-6 py-3 font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl ${
+                      hasApplied
+                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
                   >
                     <Send className="h-5 w-5 mr-2" />
-                    Apply Now
+                    {hasApplied ? 'Already Applied' : 'Apply Now'}
                   </button>
                 )}
+
                 {/* <div className="flex space-x-2">
                   <button
                     onClick={handleSave}

@@ -12,8 +12,7 @@ export const Header: React.FC = () => {
   };
 
   const isRecruiter = user?.userType?.toLowerCase() === 'recruiter';
-  console.log("Current user:", user);
-  
+
   return (
     <header className="bg-white shadow-lg border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
