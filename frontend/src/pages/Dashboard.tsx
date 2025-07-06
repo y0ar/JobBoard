@@ -27,6 +27,7 @@ import { addExperience, deleteExperience } from '../services/experienceService';
 import { updateCandidate, getCandidateById, getExperiencesByCandidateId, getStudiesByCandidateId, getApplicationsByCandidateId } from '../services/candidateService';
 import { getApplicationsByRecruiterId } from '../services/recruiterService';
 import { getAllJobs } from '../services/jobService';
+import { uploadResume, deleteResume } from '../services/resumeService';
 import { useAuth } from '../contexts/AuthContext';
 import type { Candidate, Recruiter, Experience, Study, Application, Job } from '../types';
 
@@ -40,6 +41,8 @@ export const Dashboard: React.FC = () => {
   const [recruiter, setRecruiter] = useState<Recruiter | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [selectedResume, setSelectedResume] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const [profileForm, setProfileForm] = useState({
     firstName: '',
@@ -203,6 +206,37 @@ export const Dashboard: React.FC = () => {
   };
 
 
+  const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  if (!event.target.files || !candidate) return;
+
+  const file = event.target.files[0];
+  setSelectedResume(file);
+  setUploading(true);
+
+  try {
+    if (candidate.resume?.id) {
+      await deleteResume(candidate.resume.id);
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('candidateId', candidate.id.toString());
+
+    const response = await uploadResume(formData);
+
+    setCandidate({
+      ...candidate,
+      resume: response.data,
+    });
+    } catch (error) {
+        console.error('Resume upload failed', error);
+    } finally {
+        setUploading(false);
+    }
+  };
+
+
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -333,10 +367,15 @@ export const Dashboard: React.FC = () => {
                   Uploaded on {new Date(candidate?.resume?.uploadDate).toLocaleDateString()}
                 </p>
                 <div className="flex justify-center space-x-4">
-                  <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                  <a
+                    href={candidate.resume?.fileName}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                    >
                     <Eye className="h-4 w-4 mr-2" />
                     View Resume
-                  </button>
+                  </a>
                   <button className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
                     <Upload className="h-4 w-4 mr-2" />
                     Replace Resume
@@ -350,10 +389,16 @@ export const Dashboard: React.FC = () => {
                 <p className="text-gray-600 mb-6">
                   Upload your resume to make it easier for employers to find you
                 </p>
-                <button className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                  <Upload className="h-5 w-5 mr-2" />
-                  Choose File
-                </button>
+                <label className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 cursor-pointer">
+                <Upload className="h-5 w-5 mr-2" />
+                {uploading ? 'Uploading...' : 'Choose File'}
+                <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    onChange={handleResumeUpload}
+                />
+                </label>
               </div>
             )}
           </div>

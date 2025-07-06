@@ -32,7 +32,22 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid credentials");
 
         var token = GenerateJwtToken(user);
-        return Ok(new { token, user });
+
+        var userType = _context.Entry(user).Property("UserType").CurrentValue?.ToString() ?? "User";
+
+        return Ok(new
+        {
+            token,
+            user = new
+            {
+                user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.RegistrationDate,
+                userType
+            }
+        });
     }
 
     private string GenerateJwtToken(User user)

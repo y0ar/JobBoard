@@ -32,7 +32,25 @@ namespace JobBoard.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Candidate>> GetCandidate(int id)
         {
-            var candidate = await _context.Candidates.FindAsync(id);
+            var candidate = await _context.Candidates
+                .Include(c => c.Resume)
+                .Select(c => new Candidate
+                {
+                    Id = c.Id,
+                    LastName = c.LastName,
+                    FirstName = c.FirstName,
+                    Email = c.Email,
+                    Password = c.Password,
+                    RegistrationDate = c.RegistrationDate,
+                    Resume = c.Resume != null ? new Resume
+                    {
+                        Id = c.Resume.Id,
+                        FileName = c.Resume.FileName,
+                        FileType = c.Resume.FileType,
+                        UploadDate = c.Resume.UploadDate,
+                    } : null
+                })
+                .FirstOrDefaultAsync(c => c.Id == id);
 
             if (candidate == null)
             {
@@ -69,18 +87,18 @@ namespace JobBoard.Controllers
                     ApplicationDate = a.ApplicationDate,
                     CandidateId = a.CandidateId,
                     JobId = a.JobId,
-                    Candidate = new Candidate
+                    Candidate = a.Candidate != null ? new Candidate
                     {
                         Id = a.Candidate.Id,
                         FirstName = a.Candidate.FirstName,
                         LastName = a.Candidate.LastName
-                    },
-                    Job = new Job
+                    } : null,
+                    Job = a.Job != null ? new Job
                     {
                         Id = a.Job.Id,
                         Title = a.Job.Title,
                         CompanyId = a.Job.CompanyId
-                    }
+                    } : null
                 })
                 .ToListAsync();
 
