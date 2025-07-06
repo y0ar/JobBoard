@@ -15,10 +15,12 @@ namespace JobBoard.Controllers
     public class ResumesController : ControllerBase
     {
         private readonly JobBoardContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public ResumesController(JobBoardContext context)
+        public ResumesController(JobBoardContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         // GET: api/Resumes
@@ -82,6 +84,33 @@ namespace JobBoard.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetResume", new { id = resume.Id }, resume);
+        }
+
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadResume([FromForm] IFormFile file, [FromForm] int candidateId)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+            var filePath = Path.Combine(_env.WebRootPath ?? "wwwroot", "resumes", fileName);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            using var stream = new FileStream(filePath, FileMode.Create);
+            await file.CopyToAsync(stream);
+
+            var resume = new Resume
+            {
+                FileName = file.FileName,
+                FileType = file.ContentType,
+                UploadDate = DateTime.UtcNow,
+                CandidateId = candidateId
+            };
+
+            _context.Resumes.Add(resume);
+            await _context.SaveChangesAsync();
+
+            return Ok(resume);
         }
 
         // DELETE: api/Resumes/5
