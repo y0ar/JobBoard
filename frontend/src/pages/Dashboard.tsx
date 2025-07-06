@@ -32,6 +32,7 @@ import { useAuth } from '../contexts/AuthContext';
 import type { Candidate, Recruiter, Experience, Study, Application, Job } from '../types';
 
 export const Dashboard: React.FC = () => {
+  const backendUrl = 'https://localhost:7180';
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
@@ -368,7 +369,7 @@ export const Dashboard: React.FC = () => {
                 </p>
                 <div className="flex justify-center space-x-4">
                   <a
-                    href={candidate.resume?.fileName}
+                    href={`${backendUrl}/resumes/${candidate.resume?.fileName}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"

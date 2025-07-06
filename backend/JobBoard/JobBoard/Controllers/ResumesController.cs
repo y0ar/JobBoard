@@ -92,16 +92,20 @@ namespace JobBoard.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded.");
 
-            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
-            var filePath = Path.Combine(_env.WebRootPath ?? "wwwroot", "resumes", fileName);
+            // Ensure files go to wwwroot/resumes
+            var resumesFolder = Path.Combine(_env.WebRootPath ?? "wwwroot", "resumes");
+            Directory.CreateDirectory(resumesFolder); // Create if not exists
 
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+            //var filePath = Path.Combine(resumesFolder, fileName);
+            var filePath = Path.Combine(_env.WebRootPath, "resumes");
+
             using var stream = new FileStream(filePath, FileMode.Create);
             await file.CopyToAsync(stream);
 
             var resume = new Resume
             {
-                FileName = file.FileName,
+                FileName = fileName,
                 FileType = file.ContentType,
                 UploadDate = DateTime.UtcNow,
                 CandidateId = candidateId

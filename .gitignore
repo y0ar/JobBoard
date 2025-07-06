@@ -54,3 +54,4 @@ TestResult.xml
 nunit-*.xml
 /backend/JobBoard/.vs
 /.idea
+/backend/JobBoard/JobBoard/wwwroot/resumes
