@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, DollarSign, Calendar, Building2, Users, Send } from 'lucide-react';
 import { mockJobs } from '../services/mockJobs';
 import { getJobById } from '../services/jobService';
@@ -8,6 +8,7 @@ import { addApplication } from '../services/applicationService';
 import type { Job } from '../types';
 
 export const JobDetails: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const [job, setJob] = useState<Job | null>(null);
@@ -61,9 +62,9 @@ export const JobDetails: React.FC = () => {
 
 
   const formatSalary = (salary: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('fr-MA', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'MAD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(salary);
@@ -79,7 +80,16 @@ export const JobDetails: React.FC = () => {
   };
 
   const handleApply = async () => {
-  if (!user || !job) return;
+  if (!user) {
+    navigate('/login');
+    return;
+  }
+
+  if (user.userType.toLowerCase() === 'recruiter') {
+    return; // Do nothing for recruiters
+  }
+
+  if (!job) return;
 
   try {
     await addApplication({
@@ -89,7 +99,7 @@ export const JobDetails: React.FC = () => {
       applicationDate: new Date().toISOString(),
       documents: [],
       evaluations: [],
-      interviews: []
+      interviews: [],
     });
 
     alert('Application submitted successfully!');
@@ -149,13 +159,15 @@ export const JobDetails: React.FC = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-col space-y-3 lg:ml-8">
-                <button
-                  onClick={handleApply}
-                  className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg hover:shadow-xl"
-                >
-                  <Send className="h-5 w-5 mr-2" />
-                  Apply Now
-                </button>
+                {(!user || user.userType.toLowerCase() === 'candidate') && (
+                  <button
+                    onClick={handleApply}
+                    className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    <Send className="h-5 w-5 mr-2" />
+                    Apply Now
+                  </button>
+                )}
                 {/* <div className="flex space-x-2">
                   <button
                     onClick={handleSave}
@@ -185,7 +197,7 @@ export const JobDetails: React.FC = () => {
                 <div className="prose prose-gray max-w-none">
                   <p className="text-gray-700 leading-relaxed mb-6">{job.description}</p>
                   
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Responsibilities</h3>
+                  {/* <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Responsibilities</h3>
                   <ul className="list-disc list-inside space-y-2 text-gray-700 mb-6">
                     <li>Develop and maintain high-quality web applications</li>
                     <li>Collaborate with cross-functional teams to define and implement features</li>
@@ -210,7 +222,7 @@ export const JobDetails: React.FC = () => {
                     <li>Flexible work arrangements and remote options</li>
                     <li>Professional development opportunities</li>
                     <li>Generous PTO and parental leave policies</li>
-                  </ul>
+                  </ul> */}
                 </div>
               </div>
             </div>
