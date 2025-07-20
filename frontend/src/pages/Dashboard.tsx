@@ -36,7 +36,7 @@ export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
-  const [userType] = useState<'candidate' | 'recruiter'>('candidate');
+  const userType = user?.userType?.toLowerCase() as 'candidate' | 'recruiter' | undefined;
   const [isEditing, setIsEditing] = useState(false);
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [recruiter, setRecruiter] = useState<Recruiter | null>(null);
@@ -49,6 +49,8 @@ export const Dashboard: React.FC = () => {
     firstName: '',
     lastName: '',
     email: '',
+    phoneNumber: '',
+    department: '',
   });
 
   const [newExperience, setNewExperience] = useState<Partial<Experience>>({
@@ -70,165 +72,199 @@ export const Dashboard: React.FC = () => {
   const [showAddStudy, setShowAddStudy] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-        try {
-        const userId = user ? user.id : 0;
+  if (!user || !userType) return;
 
-        if (userType === 'candidate') {
-            const [cand, exps, studies, apps] = await Promise.all([
-            getCandidateById(userId),
-            getExperiencesByCandidateId(userId),
-            getStudiesByCandidateId(userId),
-            getApplicationsByCandidateId(userId),
-            ]);
+  const fetchData = async () => {
+    try {
+      const userId = user.id;
 
-            setCandidate({ ...cand.data, experiences: exps, studies: studies, applications: apps });
-        } else {
-            const [rec, apps, jobs] = await Promise.all([
-            getRecruiterById(userId),
-            getApplicationsByRecruiterId(userId),
-            getAllJobs(),
-            ]);
+      if (userType === 'candidate') {
+        const [cand, exps, studies, apps] = await Promise.all([
+          getCandidateById(userId),
+          getExperiencesByCandidateId(userId),
+          getStudiesByCandidateId(userId),
+          getApplicationsByCandidateId(userId),
+        ]);
 
-            setRecruiter(rec.data);
-            setApplications(apps);
-            setJobs(jobs.data.filter((job: Job) => job.companyId === rec.data.companyId));
-        }
-        } catch (error) {
-            console.error('Error loading dashboard data:', error);
-        }
+        setCandidate({ ...cand.data, experiences: exps, studies: studies, applications: apps });
+      } else if (userType === 'recruiter') {
+        const [rec, apps, jobs] = await Promise.all([
+          getRecruiterById(userId),
+          getApplicationsByRecruiterId(userId),
+          getAllJobs(),
+        ]);
+
+        setRecruiter(rec.data);
+        setApplications(apps);
+        setJobs(jobs.data.filter((job) => job.companyId === rec.data.companyId));
+      }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      }
     };
 
     fetchData();
-  }, [userType]);
+  }, [user, userType]);
+
+
+  useEffect(() => {
+    if (userType === 'candidate' && candidate) {
+        setProfileForm({
+        firstName: candidate.firstName,
+        lastName: candidate.lastName,
+        email: candidate.email,
+        phoneNumber: '',
+        department: ''
+        });
+    } else if (userType === 'recruiter' && recruiter) {
+        setProfileForm({
+        firstName: recruiter.firstName,
+        lastName: recruiter.lastName,
+        email: recruiter.email,
+        phoneNumber: recruiter.phoneNumber || '',
+        department: recruiter.department || ''
+        });
+    }
+  }, [candidate, recruiter, userType]);
 
 
   const handleProfileSave = async () => {
-  if (!candidate) return;
+    if (userType === 'candidate' && candidate) {
+      // Mock update for candidate
+      const updatedCandidate: Candidate = {
+        ...candidate,
+        firstName: profileForm.firstName,
+        lastName: profileForm.lastName,
+        email: profileForm.email
+      };
+      setCandidate(updatedCandidate);
+      setIsEditing(false);
 
-  try {
-    const updatedCandidate: Candidate = {
-      ...candidate,
-      firstName: profileForm.firstName,
-      lastName: profileForm.lastName,
-      email: profileForm.email
-    };
-
-    const response = await updateCandidate(candidate.id, updatedCandidate);
-
-    setCandidate(response.data); // Use updated version from backend
-    setIsEditing(false);
-    } catch (error) {
-        console.error('Failed to update candidate profile:', error);
+      try {
+        const response = await updateCandidate(candidate.id, updatedCandidate);
+        setCandidate(response.data);
+        setIsEditing(false);
+      } catch (error) {
+          console.error('Failed to update candidate profile:', error);
+      }
+    } else if (userType === 'recruiter' && recruiter) {
+      // Mock update for recruiter
+      const updatedRecruiter: Recruiter = {
+        ...recruiter,
+        firstName: profileForm.firstName,
+        lastName: profileForm.lastName,
+        email: profileForm.email,
+        phoneNumber: profileForm.phoneNumber,
+        department: profileForm.department
+      };
+      setRecruiter(updatedRecruiter);
+      setIsEditing(false);
     }
   };
 
-
   const handleAddExperience = async () => {
-  if (!candidate || !newExperience.position || !newExperience.company || !newExperience.startDate) return;
+    if (!candidate || !newExperience.position || !newExperience.company || !newExperience.startDate) return;
 
-  try {
-    const experienceToAdd: Omit<Experience, 'id'> = {
-      position: newExperience.position,
-      company: newExperience.company,
-      startDate: newExperience.startDate,
-      endDate: newExperience.endDate || '',
-      description: newExperience.description || '',
-      candidateId: candidate.id
-    };
+    try {
+      const experienceToAdd: Omit<Experience, 'id'> = {
+        position: newExperience.position,
+        company: newExperience.company,
+        startDate: newExperience.startDate,
+        endDate: newExperience.endDate || '',
+        description: newExperience.description || '',
+        candidateId: candidate.id
+      };
 
-    const response = await addExperience(experienceToAdd);
+      const response = await addExperience(experienceToAdd);
 
-    setCandidate({
-      ...candidate,
-      experiences: [...(candidate.experiences || []), response.data]
-    });
+      setCandidate({
+        ...candidate,
+        experiences: [...(candidate.experiences || []), response.data]
+      });
 
-    setNewExperience({ position: '', company: '', startDate: '', endDate: '', description: '' });
-    setShowAddExperience(false);
+      setNewExperience({ position: '', company: '', startDate: '', endDate: '', description: '' });
+      setShowAddExperience(false);
     } catch (error) {
         console.error('Failed to save experience:', error);
     }
   };
 
   const handleAddStudy = async () => {
-  if (!candidate || !newStudy.degree || !newStudy.institution || !newStudy.startDate) return;
+    if (!candidate || !newStudy.degree || !newStudy.institution || !newStudy.startDate) return;
 
-  try {
-    const studyToAdd: Omit<Study, 'id'> = {
-      degree: newStudy.degree,
-      institution: newStudy.institution,
-      startDate: newStudy.startDate,
-      endDate: newStudy.endDate || '',
-      candidateId: candidate.id
-    };
+    try {
+      const studyToAdd: Omit<Study, 'id'> = {
+        degree: newStudy.degree,
+        institution: newStudy.institution,
+        startDate: newStudy.startDate,
+        endDate: newStudy.endDate || '',
+        candidateId: candidate.id
+      };
 
-    const response = await addStudy(studyToAdd);
+      const response = await addStudy(studyToAdd);
 
-    setCandidate({
-      ...candidate,
-      studies: [...(candidate.studies || []), response.data]
-    });
+      setCandidate({
+        ...candidate,
+        studies: [...(candidate.studies || []), response.data]
+      });
 
-    setNewStudy({ degree: '', institution: '', startDate: '', endDate: '' });
-    setShowAddStudy(false);
-  } catch (error) {
-    console.error('Failed to save study:', error);
-  }
-};
-
+      setNewStudy({ degree: '', institution: '', startDate: '', endDate: '' });
+      setShowAddStudy(false);
+    } catch (error) {
+      console.error('Failed to save study:', error);
+    }
+  };
 
   const handleDeleteExperience = async (id: number) => {
-  if (!candidate) return;
+    if (!candidate) return;
 
-  try {
-    await deleteExperience(id);
-    setCandidate({
-      ...candidate,
-      experiences: candidate.experiences.filter(exp => exp.id !== id)
-    });
+    try {
+      await deleteExperience(id);
+      setCandidate({
+        ...candidate,
+        experiences: candidate.experiences.filter(exp => exp.id !== id)
+      });
     } catch (error) {
         console.error('Failed to delete experience:', error);
     }
   };
 
   const handleDeleteStudy = async (id: number) => {
-  if (!candidate) return;
+    if (!candidate) return;
 
-  try {
-    await deleteStudy(id);
-    setCandidate({
-      ...candidate,
-      studies: candidate.studies.filter(study => study.id !== id)
-    });
+    try {
+      await deleteStudy(id);
+      setCandidate({
+        ...candidate,
+        studies: candidate.studies.filter(study => study.id !== id)
+      });
     } catch (error) {
         console.error('Failed to delete study:', error);
     }
   };
 
-
   const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  if (!event.target.files || !candidate) return;
+    if (!event.target.files || !candidate) return;
 
-  const file = event.target.files[0];
-  setSelectedResume(file);
-  setUploading(true);
+    const file = event.target.files[0];
+    setSelectedResume(file);
+    setUploading(true);
 
-  try {
-    if (candidate.resume?.id) {
-      await deleteResume(candidate.resume.id);
-    }
+    try {
+      if (candidate.resume?.id) {
+        await deleteResume(candidate.resume.id);
+      }
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('candidateId', candidate.id.toString());
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('candidateId', candidate.id.toString());
 
-    const response = await uploadResume(formData);
+      const response = await uploadResume(formData);
 
-    setCandidate({
-      ...candidate,
-      resume: response.data,
-    });
+      setCandidate({
+        ...candidate,
+        resume: response.data,
+      });
     } catch (error) {
         console.error('Resume upload failed', error);
     } finally {
@@ -236,7 +272,13 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-
+  const handleStatusUpdate = (applicationId: number, newStatus: string) => {
+    setApplications(applications.map(app => 
+      app.id === applicationId 
+        ? { ...app, status: newStatus }
+        : app
+    ));
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -257,21 +299,6 @@ export const Dashboard: React.FC = () => {
       default: return <Clock className="h-4 w-4" />;
     }
   };
-
-//   const candidateTabs = [
-//     { id: 'profile', label: 'Profile Settings', icon: Settings },
-//     { id: 'resume', label: 'Resume', icon: FileText },
-//     { id: 'applications', label: 'My Applications', icon: Briefcase },
-//     { id: 'experience', label: 'Experience & Education', icon: GraduationCap },
-//   ];
-
-//   const recruiterTabs = [
-//     { id: 'profile', label: 'Profile Settings', icon: Settings },
-//     { id: 'jobs', label: 'My Job Posts', icon: Briefcase },
-//     { id: 'applicants', label: 'Applicants', icon: Users },
-//   ];
-
-//   const tabs = userType === 'candidate' ? candidateTabs : recruiterTabs;
 
   const renderCandidateContent = () => {
     switch (activeTab) {
@@ -368,19 +395,20 @@ export const Dashboard: React.FC = () => {
                   Uploaded on {new Date(candidate?.resume?.uploadDate).toLocaleDateString()}
                 </p>
                 <div className="flex justify-center space-x-4">
-                  <a
-                    href={`${backendUrl}/resumes/${candidate.resume?.fileName}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                    >
+                  <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                     <Eye className="h-4 w-4 mr-2" />
                     View Resume
-                  </a>
-                  <button className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                  </button>
+                  <label className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 cursor-pointer">
                     <Upload className="h-4 w-4 mr-2" />
                     Replace Resume
-                  </button>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      className="hidden"
+                      onChange={handleResumeUpload}
+                    />
+                  </label>
                 </div>
               </div>
             ) : (
@@ -391,14 +419,14 @@ export const Dashboard: React.FC = () => {
                   Upload your resume to make it easier for employers to find you
                 </p>
                 <label className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 cursor-pointer">
-                <Upload className="h-5 w-5 mr-2" />
-                {uploading ? 'Uploading...' : 'Choose File'}
-                <input
+                  <Upload className="h-5 w-5 mr-2" />
+                  {uploading ? 'Uploading...' : 'Choose File'}
+                  <input
                     type="file"
                     accept=".pdf,.doc,.docx"
                     className="hidden"
                     onChange={handleResumeUpload}
-                />
+                  />
                 </label>
               </div>
             )}
@@ -644,32 +672,105 @@ export const Dashboard: React.FC = () => {
       case 'profile':
         return (
           <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Recruiter Profile</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Recruiter Profile</h2>
+              {!isEditing ? (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </button>
+              ) : (
+                <div className="flex space-x-2">
+                  <button
+                    onClick={handleProfileSave}
+                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                <p className="text-gray-900 py-3">{recruiter?.firstName}</p>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={profileForm.firstName}
+                    onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                ) : (
+                  <p className="text-gray-900 py-3">{recruiter?.firstName}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                <p className="text-gray-900 py-3">{recruiter?.lastName}</p>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={profileForm.lastName}
+                    onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                ) : (
+                  <p className="text-gray-900 py-3">{recruiter?.lastName}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <p className="text-gray-900 py-3">{recruiter?.email}</p>
+                {isEditing ? (
+                  <input
+                    type="email"
+                    value={profileForm.email}
+                    onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                ) : (
+                  <p className="text-gray-900 py-3">{recruiter?.email}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                <p className="text-gray-900 py-3">{recruiter?.phoneNumber}</p>
+                {isEditing ? (
+                  <input
+                    type="tel"
+                    value={profileForm.phoneNumber}
+                    onChange={(e) => setProfileForm({ ...profileForm, phoneNumber: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                ) : (
+                  <p className="text-gray-900 py-3">{recruiter?.phoneNumber}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                <p className="text-gray-900 py-3">{recruiter?.department}</p>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={profileForm.department}
+                    onChange={(e) => setProfileForm({ ...profileForm, department: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                ) : (
+                  <p className="text-gray-900 py-3">{recruiter?.department}</p>
+                )}
               </div>
 
               <div>
@@ -715,7 +816,7 @@ export const Dashboard: React.FC = () => {
                         Active
                       </span>
                       <button
-                        onClick={() => navigate(`/job/${job.id}`)}
+                        onClick={() => navigate(`/jobs/${job.id}`)}
                         className="inline-flex items-center px-3 py-1 text-blue-600 hover:text-blue-700 transition-colors duration-200"
                       >
                         <Eye className="h-4 w-4 mr-1" />
@@ -735,7 +836,7 @@ export const Dashboard: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Job Applicants</h2>
             
             <div className="space-y-4">
-              {candidate?.applications?.map((application) => (
+              {applications.map((application) => (
                 <div key={application.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-200">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -762,15 +863,39 @@ export const Dashboard: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-3">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(application.status)}`}>
-                        {getStatusIcon(application.status)}
-                        <span className="ml-1 capitalize">{application.status}</span>
-                      </span>
-                      <button className="inline-flex items-center px-3 py-1 text-blue-600 hover:text-blue-700 transition-colors duration-200">
-                        <Eye className="h-4 w-4 mr-1" />
-                        View Profile
-                      </button>
+                    <div className="flex flex-col items-end space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(application.status)}`}>
+                          {getStatusIcon(application.status)}
+                          <span className="ml-1 capitalize">{application.status}</span>
+                        </span>
+                        <button className="inline-flex items-center px-3 py-1 text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                          <Eye className="h-4 w-4 mr-1" />
+                          View Profile
+                        </button>
+                      </div>
+                      
+                      {/* Status Update Buttons */}
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleStatusUpdate(application.id, 'accepted')}
+                          className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors duration-200"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(application.id, 'interview')}
+                          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors duration-200"
+                        >
+                          Interview
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(application.id, 'rejected')}
+                          className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors duration-200"
+                        >
+                          Reject
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -789,14 +914,18 @@ export const Dashboard: React.FC = () => {
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {userType === 'candidate' ? 'Candidate Dashboard' : 'Recruiter Dashboard'}
-            </h1>
-            <p className="text-gray-600">
-              {userType === 'candidate' 
-                ? 'Manage your profile, applications, and career information'
-                : 'Manage your job posts and review applicants'}
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {userType === 'candidate' ? 'Candidate Dashboard' : 'Recruiter Dashboard'}
+                </h1>
+                <p className="text-gray-600">
+                  {userType === 'candidate' 
+                    ? 'Manage your profile, applications, and career information'
+                    : 'Manage your job posts and review applicants'}
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -848,9 +977,7 @@ export const Dashboard: React.FC = () => {
             </div>
 
             <div className="lg:col-span-3">
-              {userType === 'candidate'
-                ? candidate && renderCandidateContent()
-                : recruiter && renderRecruiterContent()}
+              {userType === 'candidate' ? renderCandidateContent() : renderRecruiterContent()}
             </div>
           </div>
         </div>
