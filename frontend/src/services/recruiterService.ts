@@ -14,3 +14,6 @@ export const getApplicationsByRecruiterId = async (recruiterId: number): Promise
   const res = await axios.get(`${ENDPOINT}/${recruiterId}/applications`);
   return res.data;
 };
+
+export const updateRecruiter = (id: number, recruiter: Recruiter) =>
+  axios.put<Recruiter>(`${ENDPOINT}/${id}`, recruiter);

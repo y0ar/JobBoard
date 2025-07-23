@@ -1,31 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  User, 
-  Settings, 
-  FileText, 
-  Briefcase, 
-  GraduationCap, 
-  Upload, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye,
-  Calendar,
-  MapPin,
-  Building2,
-  Save,
-  X,
-  CheckCircle,
-  Clock,
-  XCircle,
-  Users
-} from 'lucide-react';
+import { User, Settings, FileText, Briefcase, GraduationCap, Upload, Plus, Edit, Trash2, Eye, Calendar, MapPin, Building2, Save, X, CheckCircle, Clock, XCircle, Users } from 'lucide-react';
 import { getRecruiterById } from '../services/recruiterService';
 import { addStudy, deleteStudy } from '../services/studyService';
 import { addExperience, deleteExperience } from '../services/experienceService';
 import { updateCandidate, getCandidateById, getExperiencesByCandidateId, getStudiesByCandidateId, getApplicationsByCandidateId } from '../services/candidateService';
-import { getApplicationsByRecruiterId } from '../services/recruiterService';
+import { getApplicationsByRecruiterId, updateRecruiter } from '../services/recruiterService';
 import { getAllJobs } from '../services/jobService';
 import { uploadResume, deleteResume } from '../services/resumeService';
 import { useAuth } from '../contexts/AuthContext';
@@ -130,7 +110,6 @@ export const Dashboard: React.FC = () => {
 
   const handleProfileSave = async () => {
     if (userType === 'candidate' && candidate) {
-      // Mock update for candidate
       const updatedCandidate: Candidate = {
         ...candidate,
         firstName: profileForm.firstName,
@@ -141,14 +120,19 @@ export const Dashboard: React.FC = () => {
       setIsEditing(false);
 
       try {
-        const response = await updateCandidate(candidate.id, updatedCandidate);
-        setCandidate(response.data);
+        await updateCandidate(candidate.id, updatedCandidate);
+        const refreshed = await getCandidateById(candidate.id);
+        setCandidate({
+          ...refreshed.data,
+          experiences: candidate.experiences,
+          studies: candidate.studies,
+          applications: candidate.applications
+        });
         setIsEditing(false);
       } catch (error) {
           console.error('Failed to update candidate profile:', error);
       }
     } else if (userType === 'recruiter' && recruiter) {
-      // Mock update for recruiter
       const updatedRecruiter: Recruiter = {
         ...recruiter,
         firstName: profileForm.firstName,
@@ -157,9 +141,17 @@ export const Dashboard: React.FC = () => {
         phoneNumber: profileForm.phoneNumber,
         department: profileForm.department
       };
-      setRecruiter(updatedRecruiter);
-      setIsEditing(false);
+
+      try {
+        await updateRecruiter(recruiter.id, updatedRecruiter);
+        const refreshed = await getRecruiterById(recruiter.id);
+        setRecruiter(refreshed.data);
+        setIsEditing(false);
+      } catch (error) {
+        console.error('Failed to update recruiter profile:', error);
+      }
     }
+
   };
 
   const handleAddExperience = async () => {
