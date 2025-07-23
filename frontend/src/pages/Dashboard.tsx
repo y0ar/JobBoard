@@ -387,10 +387,15 @@ export const Dashboard: React.FC = () => {
                   Uploaded on {new Date(candidate?.resume?.uploadDate).toLocaleDateString()}
                 </p>
                 <div className="flex justify-center space-x-4">
-                  <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                  <a
+                    href={`${backendUrl}/resumes/${candidate.resume?.fileName}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                    >
                     <Eye className="h-4 w-4 mr-2" />
                     View Resume
-                  </button>
+                  </a>
                   <label className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 cursor-pointer">
                     <Upload className="h-4 w-4 mr-2" />
                     Replace Resume

@@ -98,7 +98,7 @@ namespace JobBoard.Controllers
 
             var fileName = $"{Guid.NewGuid()}_{file.FileName}";
             //var filePath = Path.Combine(resumesFolder, fileName);
-            var filePath = Path.Combine(_env.WebRootPath, "resumes");
+            var filePath = Path.Combine(_env.WebRootPath, "resumes", fileName);
 
             using var stream = new FileStream(filePath, FileMode.Create);
             await file.CopyToAsync(stream);
