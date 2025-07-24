@@ -9,3 +9,8 @@ export const getApplicationById = (id: number) => axios.get<Application>(`${ENDP
 
 export const addApplication = (application: Omit<Application, 'id'>) =>
   axios.post<Application>(ENDPOINT, application);
+
+export const updateApplicationStatus = (id: number, status: string) =>
+  axios.put(`${ENDPOINT}/${id}/status`, status, {
+    headers: { 'Content-Type': 'application/json' },
+  });

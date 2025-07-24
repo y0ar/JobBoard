@@ -8,6 +8,7 @@ import { updateCandidate, getCandidateById, getExperiencesByCandidateId, getStud
 import { getApplicationsByRecruiterId, updateRecruiter } from '../services/recruiterService';
 import { getAllJobs } from '../services/jobService';
 import { uploadResume, deleteResume } from '../services/resumeService';
+import { updateApplicationStatus } from '../services/applicationService';
 import { useAuth } from '../contexts/AuthContext';
 import type { Candidate, Recruiter, Experience, Study, Application, Job } from '../types';
 
@@ -264,12 +265,26 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  const handleStatusUpdate = (applicationId: number, newStatus: string) => {
-    setApplications(applications.map(app => 
-      app.id === applicationId 
-        ? { ...app, status: newStatus }
-        : app
-    ));
+  const handleStatusUpdate = async (applicationId: number, newStatus: string) => {
+  try {
+    await updateApplicationStatus(applicationId, newStatus);
+
+    if (recruiter) {
+      applications.map(app =>
+        app.id === applicationId ? { ...app, status: newStatus } : app
+      );
+
+      setApplications(applications.map(app => 
+        app.id === applicationId 
+          ? { ...app, status: newStatus }
+          : app
+      ));
+    }
+
+    } catch (error) {
+      console.error('Failed to update application status:', error);
+      alert('Status update failed.');
+    }
   };
 
   const getStatusColor = (status: string) => {

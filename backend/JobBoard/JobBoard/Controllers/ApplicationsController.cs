@@ -73,6 +73,21 @@ namespace JobBoard.Controllers
             return NoContent();
         }
 
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] string newStatus)
+        {
+            var application = await _context.Applications.FindAsync(id);
+
+            if (application == null)
+                return NotFound();
+
+            application.Status = newStatus;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
         // POST: api/Applications
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
