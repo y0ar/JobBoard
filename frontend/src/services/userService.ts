@@ -1,7 +1,7 @@
 import axios from './axios';
 import type { User } from '../types';
 
-// const ENDPOINT = '/users';
+const ENDPOINT = '/users';
 
 export const registerUser = (user: Partial<User> & { userType: string }) => {
   switch (user.userType.toLowerCase()) {
@@ -15,3 +15,6 @@ export const registerUser = (user: Partial<User> & { userType: string }) => {
       throw new Error('Unsupported user type');
   }
 };
+
+
+export const getAllUsers = () => axios.get('/users');

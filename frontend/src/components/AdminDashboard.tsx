@@ -1,14 +1,42 @@
+import { useEffect, useState } from 'react';
 import { Users, Briefcase, FileText, TrendingUp } from 'lucide-react';
+import { getAllApplications } from '../services/applicationService';
+import { getAllJobs } from '../services/jobService';
+import { getAllUsers } from '../services/userService';
 
-interface DashboardProps {
-  stats: {
-    applications: number;
-    jobs: number;
-    users: number;
-  };
-}
+export default function AdminDashboard() {
+  const [stats, setStats] = useState({
+    applications: 0,
+    jobs: 0,
+    users: 0
+  });
+  const [loading, setLoading] = useState(true);
 
-export default function Dashboard({ stats }: DashboardProps) {
+  useEffect(() => {
+    // Fetch all stats in parallel
+    const fetchStats = async () => {
+      try {
+        const [appsRes, jobsRes, usersRes] = await Promise.all([
+          getAllApplications(),
+          getAllJobs(),
+          getAllUsers(),
+        ]);
+
+        setStats({
+          applications: appsRes.data.length,
+          jobs: jobsRes.data.length,
+          users: usersRes.data.length,
+        });
+      } catch (err) {
+        console.error('Failed to fetch stats', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   const cards = [
     {
       title: 'Total Applications',
@@ -35,6 +63,14 @@ export default function Dashboard({ stats }: DashboardProps) {
       textColor: 'text-purple-600'
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600 text-lg">Loading dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <div>

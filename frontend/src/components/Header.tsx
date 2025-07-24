@@ -12,6 +12,7 @@ export const Header: React.FC = () => {
   };
 
   const isRecruiter = user?.userType?.toLowerCase() === 'recruiter';
+  const isAdmin = user?.userType?.toLowerCase() === 'administrator';
 
   return (
     <header className="bg-white shadow-lg border-b border-gray-100">
@@ -37,7 +38,7 @@ export const Header: React.FC = () => {
               About
             </Link>            
             {/* Dashboard Link */}
-            <Link to="/dashboard" className="inline-flex items-center px-4 py-2 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200">
+            <Link to={isAdmin ? "/admin-dashboard" : "/dashboard"} className="inline-flex items-center px-4 py-2 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200">
               <LayoutDashboard className="h-4 w-4 mr-2" />
               Dashboard
             </Link>
