@@ -46,9 +46,9 @@ export default function AdminDashboard() {
 
   const handleUpdateUser = async (updatedUser: User) => {
   try {
-    const res = await updateUser(updatedUser.id, updatedUser);
+    await updateUser(updatedUser.id, updatedUser);
     setUsers(users.map(user =>
-      user.id === updatedUser.id ? res.data : user
+      user.id === updatedUser.id ? updatedUser : user
     ));
     alert('User updated!');
     } catch (e) {
@@ -70,9 +70,9 @@ export default function AdminDashboard() {
 
   const handleUpdateJob = async (updatedJob: Job) => {
     try {
-      const res = await updateJob(updatedJob.id, updatedJob);
+      await updateJob(updatedJob.id, updatedJob);
       setJobs(jobs.map(job =>
-        job.id === updatedJob.id ? res.data : job
+        job.id === updatedJob.id ? updatedJob : job
       ));
       alert('Job updated!');
     } catch (e) {
