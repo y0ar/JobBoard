@@ -1,14 +1,30 @@
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import type { Candidate } from '../types';
 import { ArrowLeft, GraduationCap, Briefcase, FileText, Calendar, Building } from 'lucide-react';
+import { getCandidateById } from '../services/candidateService';
 
 const backendUrl = 'https://localhost:7180';
 
 interface CandidateProfileProps {
-  candidate: Candidate;
-  onBack: () => void;
+  candidate?: Candidate;
+  onBack?: () => void;
 }
 
-export default function CandidateProfile({ candidate, onBack }: CandidateProfileProps) {
+export default function CandidateProfile({ candidate: candidateProp, onBack }: CandidateProfileProps) {
+  const { id } = useParams<{ id: string }>();
+  const [candidate, setCandidate] = useState<Candidate | null>(candidateProp || null);
+  const [loading, setLoading] = useState(!candidateProp);
+
+  useEffect(() => {
+    if (!candidateProp && id) {
+      setLoading(true);
+      getCandidateById(Number(id))
+        .then(res => setCandidate(res.data))
+        .finally(() => setLoading(false));
+    }
+  }, [candidateProp, id]);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -22,7 +38,6 @@ export default function CandidateProfile({ candidate, onBack }: CandidateProfile
     const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
     const years = Math.floor(months / 12);
     const remainingMonths = months % 12;
-    
     if (years > 0 && remainingMonths > 0) {
       return `${years} year${years > 1 ? 's' : ''} ${remainingMonths} month${remainingMonths > 1 ? 's' : ''}`;
     } else if (years > 0) {
@@ -32,17 +47,26 @@ export default function CandidateProfile({ candidate, onBack }: CandidateProfile
     }
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  if (!candidate) {
+    return <div className="text-center text-gray-500 py-12">Candidate not found.</div>;
+  }
+
   return (
     <div>
       {/* Header */}
       <div className="mb-8">
-        <button
-          onClick={onBack}
-          className="flex items-center text-blue-600 hover:text-blue-800 mb-4 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Users
-        </button>
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="flex items-center text-blue-600 hover:text-blue-800 mb-4 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Users
+          </button>
+        )}
         <div className="flex items-center space-x-4">
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
             <span className="text-2xl font-bold text-blue-600">
@@ -66,7 +90,6 @@ export default function CandidateProfile({ candidate, onBack }: CandidateProfile
               <GraduationCap className="h-6 w-6 text-blue-600 mr-3" />
               <h2 className="text-xl font-semibold text-gray-900">Education</h2>
             </div>
-            
             {candidate.studies && candidate.studies.length > 0 ? (
               <div className="space-y-6">
                 {candidate.studies.map((study) => (
@@ -98,7 +121,6 @@ export default function CandidateProfile({ candidate, onBack }: CandidateProfile
               <Briefcase className="h-6 w-6 text-green-600 mr-3" />
               <h2 className="text-xl font-semibold text-gray-900">Work Experience</h2>
             </div>
-            
             {candidate.experiences && candidate.experiences.length > 0 ? (
               <div className="space-y-6">
                 {candidate.experiences.map((experience) => (
@@ -135,7 +157,6 @@ export default function CandidateProfile({ candidate, onBack }: CandidateProfile
               <FileText className="h-6 w-6 text-purple-600 mr-3" />
               <h2 className="text-xl font-semibold text-gray-900">Resume</h2>
             </div>
-            
             {candidate.resume ? (
               <div className="space-y-4">
                 <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
@@ -144,14 +165,12 @@ export default function CandidateProfile({ candidate, onBack }: CandidateProfile
                   </div>
                   <p className="text-purple-900 font-semibold">{candidate.resume.fileName}</p>
                 </div>
-                
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-600">File Type</span>
                   </div>
                   <p className="text-gray-900 uppercase font-mono text-sm">{candidate.resume.fileType}</p>
                 </div>
-                
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-600">Upload Date</span>
@@ -165,10 +184,9 @@ export default function CandidateProfile({ candidate, onBack }: CandidateProfile
                     })}
                   </p>
                 </div>
-                
                 <a
                   href={`${backendUrl}/resumes/${candidate.resume?.fileName}`}
-                  download={candidate.resume?.fileName} // This triggers download
+                  download={candidate.resume?.fileName}
                   className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
                 >
                   <FileText className="h-4 w-4 mr-2" />
@@ -199,12 +217,6 @@ export default function CandidateProfile({ candidate, onBack }: CandidateProfile
                   {candidate.jobAlerts?.length || 0}
                 </span>
               </div>
-              {/* <div className="flex justify-between">
-                <span className="text-gray-600">Skills</span>
-                <span className="font-semibold text-gray-900">
-                  {candidate.skills?.length || 0}
-                </span>
-              </div> */}
             </div>
           </div>
         </div>

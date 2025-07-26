@@ -881,7 +881,10 @@ export const Dashboard: React.FC = () => {
                           {getStatusIcon(application.status)}
                           <span className="ml-1 capitalize">{application.status}</span>
                         </span>
-                        <button className="inline-flex items-center px-3 py-1 text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                        <button
+                          className="inline-flex items-center px-3 py-1 text-blue-600 hover:text-blue-700 transition-colors duration-200"
+                          onClick={() => navigate(`/candidate-profile/${application.candidateId}`)}
+                        >
                           <Eye className="h-4 w-4 mr-1" />
                           View Profile
                         </button>
