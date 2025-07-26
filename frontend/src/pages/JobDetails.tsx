@@ -163,7 +163,7 @@ export const JobDetails: React.FC = () => {
                   </span>
                   <div className="flex items-center text-gray-500 text-sm">
                     <Calendar className="h-4 w-4 mr-1" />
-                    Posted {formatDate(job.postDate)}
+                    Posted {formatDate(job.publicationDate)}
                   </div>
                 </div>
               </div>
@@ -247,7 +247,7 @@ export const JobDetails: React.FC = () => {
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Company Info */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
+              {/* <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">About {job.company?.name}</h3>
                 <div className="space-y-4">
                   <div className="flex items-center text-gray-600">
@@ -272,7 +272,7 @@ export const JobDetails: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Job Stats */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -280,21 +280,21 @@ export const JobDetails: React.FC = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Applications</span>
-                    <span className="font-semibold text-gray-900">47</span>
+                    <span className="font-semibold text-gray-900">{job.applications?.length || 0}</span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  {/* <div className="flex justify-between items-center">
                     <span className="text-gray-600">Views</span>
                     <span className="font-semibold text-gray-900">1,234</span>
-                  </div>
+                  </div> */}
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Posted</span>
-                    <span className="font-semibold text-gray-900">{formatDate(job.postDate)}</span>
+                    <span className="font-semibold text-gray-900">{formatDate(job.publicationDate)}</span>
                   </div>
                 </div>
               </div>
 
               {/* Similar Jobs */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
+              {/* <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Similar Jobs</h3>
                 <div className="space-y-4">
                   {mockJobs.filter(j => j.id !== job.id).slice(0, 3).map((similarJob) => (
@@ -311,7 +311,7 @@ export const JobDetails: React.FC = () => {
                     </Link>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

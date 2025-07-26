@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Building2, MapPin, DollarSign, Briefcase } from 'lucide-react';
+import { ArrowLeft, Plus, MapPin, DollarSign, Briefcase } from 'lucide-react';
 import { addJob } from '../services/jobService';
 
 export const AddJob: React.FC = () => {
@@ -18,6 +18,7 @@ export const AddJob: React.FC = () => {
     companyEmail: '',
     jobType: 'full-time',
     workMode: 'remote',
+    expirationDate: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -28,24 +29,25 @@ export const AddJob: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
+    e.preventDefault();
+    setIsLoading(true);
 
-  try {
-    const jobToSend = {
-      title: formData.title,
-      description: formData.description,
-      location: formData.location,
-      salary: parseFloat(formData.salary),
-      workMode: formData.workMode,
-      jobType: formData.jobType,
-      postDate: new Date().toISOString(),
-      companyId: 1,
-      applications: [],
-    };
+    try {
+      const jobToSend = {
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        salary: parseFloat(formData.salary),
+        workMode: formData.workMode,
+        jobType: formData.jobType,
+        publicationDate: new Date().toISOString(),
+        expirationDate: formData.expirationDate ?? new Date(formData.expirationDate).toISOString(),
+        companyId: 1,
+        applications: [],
+      };
 
-    await addJob(jobToSend);
-    navigate('/');
+      await addJob(jobToSend);
+      navigate('/');
     } catch (error) {
       console.error('Error posting job:', error);
       alert('Failed to post job. Please try again.');
@@ -53,7 +55,6 @@ export const AddJob: React.FC = () => {
       setIsLoading(false);
     }
   };
-
 
   return (
     <main className="flex-1">
@@ -119,7 +120,7 @@ export const AddJob: React.FC = () => {
                       value={formData.location}
                       onChange={handleInputChange}
                       className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                      placeholder="e.g. San Francisco, CA or Remote"
+                      placeholder="e.g. Casablanca, Morocco"
                     />
                   </div>
                 </div>
@@ -180,6 +181,22 @@ export const AddJob: React.FC = () => {
                     <option value="on-site">On-site</option>
                     <option value="hybrid">Hybrid</option>
                   </select>
+                </div>
+
+                {/* Expiration Date */}
+                <div>
+                  <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700 mb-2">
+                    Expiration Date *
+                  </label>
+                  <input
+                    id="expirationDate"
+                    name="expirationDate"
+                    type="date"
+                    required
+                    value={formData.expirationDate}
+                    onChange={handleInputChange}
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                  />
                 </div>
 
                 <div className="lg:col-span-2">

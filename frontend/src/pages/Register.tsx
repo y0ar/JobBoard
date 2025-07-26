@@ -286,7 +286,7 @@ export const Register: React.FC = () => {
 
 
             {/* Terms and Conditions */}
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <input
                 id="terms"
                 type="checkbox"
@@ -303,7 +303,7 @@ export const Register: React.FC = () => {
                   Privacy Policy
                 </Link>
               </label>
-            </div>
+            </div> */}
 
             {/* Submit Button */}
             <button

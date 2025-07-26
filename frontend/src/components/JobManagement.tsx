@@ -21,6 +21,13 @@ const workModeOptions = [
   { value: "hybrid", label: "Hybrid" }
 ];
 
+function getDateInputString(dateValue: string | Date | undefined) {
+  if (!dateValue) return "";
+  const d = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 10);
+}
+
 export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobManagementProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingJob, setEditingJob] = useState<Job | null>(null);
@@ -34,7 +41,12 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
   const handleSaveJob = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingJob) {
-      onUpdateJob(editingJob);
+      let expDate: string | Date | undefined = editingJob.expirationDate;
+      if (expDate && typeof expDate === "string" && expDate.length === 10) {
+        // YYYY-MM-DD format
+        expDate = new Date(expDate + "T00:00:00Z").toISOString();
+      }
+      onUpdateJob({ ...editingJob, expirationDate: expDate as any });
       setEditingJob(null);
     }
   };
@@ -51,8 +63,7 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "";
-    
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -99,7 +110,7 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-1" />
-                    {formatDate(job.postDate)}
+                    {formatDate(job.publicationDate)}
                   </div>
                 </div>
                 <div className="flex items-center space-x-2 mt-2">
@@ -108,6 +119,9 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
                   </span>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     {workModeOptions.find(opt => opt.value === job.workMode)?.label || job.workMode}
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    Expires: {formatDate(job.expirationDate)}
                   </span>
                 </div>
               </div>
@@ -159,7 +173,7 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
                   <input
                     type="text"
                     value={editingJob.title}
-                    onChange={(e) => setEditingJob({...editingJob, title: e.target.value})}
+                    onChange={(e) => setEditingJob({ ...editingJob, title: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
@@ -168,7 +182,7 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                   <textarea
                     value={editingJob.description}
-                    onChange={(e) => setEditingJob({...editingJob, description: e.target.value})}
+                    onChange={(e) => setEditingJob({ ...editingJob, description: e.target.value })}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
@@ -180,7 +194,7 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
                     <input
                       type="text"
                       value={editingJob.location}
-                      onChange={(e) => setEditingJob({...editingJob, location: e.target.value})}
+                      onChange={(e) => setEditingJob({ ...editingJob, location: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
@@ -190,7 +204,7 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
                     <input
                       type="number"
                       value={editingJob.salary}
-                      onChange={(e) => setEditingJob({...editingJob, salary: parseInt(e.target.value)})}
+                      onChange={(e) => setEditingJob({ ...editingJob, salary: parseInt(e.target.value) })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
@@ -223,6 +237,22 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
                       ))}
                     </select>
                   </div>
+                </div>
+                {/* Expiration Date */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
+                  <input
+                    type="date"
+                    value={getDateInputString(editingJob.expirationDate)}
+                    onChange={e =>
+                      setEditingJob({
+                        ...editingJob,
+                        expirationDate: e.target.value
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
                 </div>
               </div>
               <div className="flex justify-end space-x-3 mt-6">

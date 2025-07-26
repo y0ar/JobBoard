@@ -819,7 +819,7 @@ export const Dashboard: React.FC = () => {
                       </div>
                       <div className="flex items-center text-gray-600 mb-4">
                         <Calendar className="h-4 w-4 mr-2" />
-                        <span>Posted on {new Date(job.postDate).toLocaleDateString()}</span>
+                        <span>Posted on {new Date(job.publicationDate).toLocaleDateString()}</span>
                       </div>
                       <p className="text-gray-700 line-clamp-2">{job.description}</p>
                     </div>

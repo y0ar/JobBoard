@@ -28,15 +28,18 @@ export const Header: React.FC = () => {
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-              Jobs
-            </Link>
-            <Link to="/companies" className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+            {user && (
+              <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                Jobs
+              </Link>
+            )}
+
+            {/* <Link to="/companies" className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
               Companies
             </Link>
             <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
               About
-            </Link>            
+            </Link>*/}
             {/* Dashboard Link */}
             {user && (
               <Link to={isAdmin ? "/admin-dashboard" : "/dashboard"} className="inline-flex items-center px-4 py-2 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200">

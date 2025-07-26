@@ -66,7 +66,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           </div>
 
           {/* Advanced Filters */}
-          <div className="mt-4 flex items-center justify-center">
+          {/* <div className="mt-4 flex items-center justify-center">
             <button
               type="button"
               className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors duration-200"
@@ -74,7 +74,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
               <Filter className="h-4 w-4 mr-2" />
               Advanced Filters
             </button>
-          </div>
+          </div> */}
         </form>
       </div>
     </div>

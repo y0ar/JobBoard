@@ -74,10 +74,10 @@ export default function AdminHome({ stats }: AdminHomeProps) {
               {stats.jobs > 0 ? (stats.applications / stats.jobs).toFixed(1) : '0'}
             </p>
           </div>
-          <div className="p-4 bg-gray-50 rounded-lg">
+          {/* <div className="p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600">Platform Growth</p>
             <p className="text-2xl font-bold text-green-600">+12%</p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

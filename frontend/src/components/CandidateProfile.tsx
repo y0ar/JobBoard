@@ -199,12 +199,12 @@ export default function CandidateProfile({ candidate, onBack }: CandidateProfile
                   {candidate.jobAlerts?.length || 0}
                 </span>
               </div>
-              <div className="flex justify-between">
+              {/* <div className="flex justify-between">
                 <span className="text-gray-600">Skills</span>
                 <span className="font-semibold text-gray-900">
                   {candidate.skills?.length || 0}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

@@ -61,7 +61,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onClick }) => {
         </div>
         <div className="flex items-center text-gray-500 text-sm">
           <Clock className="h-4 w-4 mr-1" />
-          {formatDate(job.postDate)}
+          {formatDate(job.publicationDate)}
         </div>
       </div>
 
