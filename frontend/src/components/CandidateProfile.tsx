@@ -1,6 +1,8 @@
 import type { Candidate } from '../types';
 import { ArrowLeft, GraduationCap, Briefcase, FileText, Calendar, Building } from 'lucide-react';
 
+const backendUrl = 'https://localhost:7180';
+
 interface CandidateProfileProps {
   candidate: Candidate;
   onBack: () => void;
@@ -164,10 +166,14 @@ export default function CandidateProfile({ candidate, onBack }: CandidateProfile
                   </p>
                 </div>
                 
-                <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center">
+                <a
+                  href={`${backendUrl}/resumes/${candidate.resume?.fileName}`}
+                  download={candidate.resume?.fileName} // This triggers download
+                  className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
+                >
                   <FileText className="h-4 w-4 mr-2" />
                   Download Resume
-                </button>
+                </a>
               </div>
             ) : (
               <div className="text-center py-8">

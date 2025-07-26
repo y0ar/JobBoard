@@ -42,6 +42,10 @@ namespace JobBoard.Controllers
                     Email = c.Email,
                     Password = c.Password,
                     RegistrationDate = c.RegistrationDate,
+                    Applications = c.Applications,
+                    Experiences = c.Experiences,
+                    JobAlerts = c.JobAlerts,
+                    Studies = c.Studies,
                     Resume = c.Resume != null ? new Resume
                     {
                         Id = c.Resume.Id,

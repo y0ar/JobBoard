@@ -102,7 +102,7 @@ export default function UserManagement({ users, onUpdateUser, onDeleteUser, onVi
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-                      {user.userType === 'candidate' && (
+                      {user.userType.toLowerCase() === 'candidate' && (
                         <button
                           onClick={() => onViewCandidate(user as Candidate)}
                           className="text-blue-600 hover:text-blue-900 p-1 rounded"
