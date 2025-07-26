@@ -8,7 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './contexts/AuthContext';
-import AdminDashboard from './components/AdminDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
 const Companies = () => <div>Companies Page</div>;
 const About = () => <div>About Page</div>;

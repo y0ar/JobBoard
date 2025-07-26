@@ -17,4 +17,4 @@ export const registerUser = (user: Partial<User> & { userType: string }) => {
 };
 
 
-export const getAllUsers = () => axios.get('/users');
+export const getAllUsers = () => axios.get(ENDPOINT);
