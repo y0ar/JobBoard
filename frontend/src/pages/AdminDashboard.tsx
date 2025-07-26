@@ -8,6 +8,7 @@ import { getAllUsers, updateUser, deleteUser } from '../services/userService';
 import { getAllJobs, updateJob, deleteJob } from '../services/jobService';
 import { getAllApplications } from '../services/applicationService';
 import { getCandidateById } from '../services/candidateService';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState<'admin-dashboard' | 'users' | 'jobs' | 'candidate-profile'>('admin-dashboard');
@@ -15,6 +16,7 @@ export default function AdminDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,7 +28,8 @@ export default function AdminDashboard() {
           getAllJobs(),
           getAllApplications()
         ]);
-        setUsers(usersRes.data);
+        const users = usersRes.data.filter((u: User) => u.id !== user?.id)
+        setUsers(users);
         setJobs(jobsRes.data);
         setApplications(appsRes.data);
       } catch (err) {

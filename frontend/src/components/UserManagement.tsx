@@ -18,7 +18,7 @@ export default function UserManagement({ users, onUpdateUser, onDeleteUser, onVi
     const matchesSearch = user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || user.userType === filterType;
+    const matchesType = filterType === 'all' || user.userType.toLowerCase() === filterType;
     return matchesSearch && matchesType;
   });
 
