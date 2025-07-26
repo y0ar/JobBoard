@@ -201,7 +201,7 @@ export const AddJob: React.FC = () => {
             </div>
 
             {/* Company Information */}
-            <div>
+            {/* <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                 <Building2 className="h-5 w-5 mr-2" />
                 Company Information
@@ -288,7 +288,7 @@ export const AddJob: React.FC = () => {
                   />
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Submit Button */}
             <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">

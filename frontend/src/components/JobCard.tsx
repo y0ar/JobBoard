@@ -2,6 +2,19 @@ import React from 'react';
 import { MapPin, DollarSign, Building2, Clock } from 'lucide-react';
 import type { Job } from '../types';
 
+const jobTypeLabels: Record<string, string> = {
+  "full-time": "Full-time",
+  "part-time": "Part-time",
+  "contract": "Contract",
+  "internship": "Internship"
+};
+
+const workModeLabels: Record<string, string> = {
+  "remote": "Remote",
+  "on-site": "On-site",
+  "hybrid": "Hybrid"
+};
+
 interface JobCardProps {
   job: Job;
   onClick: (job: Job) => void;
@@ -70,10 +83,10 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onClick }) => {
         
         <div className="flex items-center space-x-2">
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            {job.jobType}
+            {jobTypeLabels[job.jobType] || job.jobType}
           </span>
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            {job.workMode}
+            {workModeLabels[job.workMode] || job.workMode}
           </span>
         </div>
       </div>
