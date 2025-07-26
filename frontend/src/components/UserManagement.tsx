@@ -31,7 +31,7 @@ export default function UserManagement({ users, onUpdateUser, onDeleteUser, onVi
   };
 
   const getUserTypeColor = (userType: string) => {
-    switch (userType) {
+    switch (userType.toLowerCase()) {
       case 'candidate': return 'bg-blue-100 text-blue-800';
       case 'recruiter': return 'bg-green-100 text-green-800';
       case 'administrator': return 'bg-purple-100 text-purple-800';
@@ -171,7 +171,7 @@ export default function UserManagement({ users, onUpdateUser, onDeleteUser, onVi
                     required
                   />
                 </div>
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">User Type</label>
                   <select
                     value={editingUser.userType}
@@ -182,7 +182,7 @@ export default function UserManagement({ users, onUpdateUser, onDeleteUser, onVi
                     <option value="recruiter">Recruiter</option>
                     <option value="administrator">Administrator</option>
                   </select>
-                </div>
+                </div> */}
               </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button
