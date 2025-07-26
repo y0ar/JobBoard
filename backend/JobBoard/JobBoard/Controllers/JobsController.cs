@@ -25,7 +25,9 @@ namespace JobBoard.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
         {
-            return await _context.Jobs.ToListAsync();
+            return await _context.Jobs
+                .Include(j => j.Applications)
+                .ToListAsync();
         }
 
         // GET: api/Jobs/5

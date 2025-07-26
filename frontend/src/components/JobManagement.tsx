@@ -8,6 +8,19 @@ interface JobManagementProps {
   onDeleteJob: (id: number) => void;
 }
 
+const jobTypeOptions = [
+  { value: "full-time", label: "Full-time" },
+  { value: "part-time", label: "Part-time" },
+  { value: "contract", label: "Contract" },
+  { value: "internship", label: "Internship" }
+];
+
+const workModeOptions = [
+  { value: "remote", label: "Remote" },
+  { value: "on-site", label: "On-site" },
+  { value: "hybrid", label: "Hybrid" }
+];
+
 export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobManagementProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingJob, setEditingJob] = useState<Job | null>(null);
@@ -36,6 +49,9 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
   };
 
   const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+    
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -86,6 +102,14 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
                     {formatDate(job.postDate)}
                   </div>
                 </div>
+                <div className="flex items-center space-x-2 mt-2">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {jobTypeOptions.find(opt => opt.value === job.jobType)?.label || job.jobType}
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    {workModeOptions.find(opt => opt.value === job.workMode)?.label || job.workMode}
+                  </span>
+                </div>
               </div>
               <div className="flex space-x-2 ml-4">
                 <button
@@ -104,9 +128,7 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
                 </button>
               </div>
             </div>
-            
             <p className="text-gray-600 text-sm line-clamp-3 mb-4">{job.description}</p>
-            
             <div className="flex justify-between items-center text-sm">
               <span className="text-blue-600 font-medium">
                 {job.applications?.length || 0} applications
@@ -172,6 +194,34 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Job Type</label>
+                    <select
+                      value={editingJob.jobType}
+                      onChange={e => setEditingJob({ ...editingJob, jobType: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    >
+                      {jobTypeOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
+                    <select
+                      value={editingJob.workMode}
+                      onChange={e => setEditingJob({ ...editingJob, workMode: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    >
+                      {workModeOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>
