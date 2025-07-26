@@ -47,6 +47,8 @@ export interface Job {
   description: string;
   location: string;
   salary: number;
+  workMode: string;
+  jobType: string;
   postDate: string;
   companyId: number;
   company?: Company;

@@ -29,7 +29,7 @@ export default function JobManagement({ jobs, onUpdateJob, onDeleteJob }: JobMan
   const formatSalary = (salary: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'MAD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(salary);

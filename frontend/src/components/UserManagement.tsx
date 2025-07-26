@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { User, Candidate, Recruiter } from '../types';
+import type { User, Candidate } from '../types';
 import { Edit, Trash2, Search, Eye } from 'lucide-react';
 
 interface UserManagementProps {

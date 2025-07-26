@@ -6,6 +6,9 @@ public class Job
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Location { get; set; } = string.Empty;
+    public float Salary { get; set; }
+    public string WorkMode { get; set; } = string.Empty;
+    public string JobType { get; set; } = string.Empty;
     public string RequiredEducationLevel { get; set; } = string.Empty;
     public string RequiredSkills { get; set; } = string.Empty;
 

@@ -43,6 +43,8 @@ namespace JobBoard.Controllers
                     Location = j.Location,
                     PublicationDate = j.PublicationDate,
                     ExpirationDate = j.ExpirationDate,
+                    Salary = j.Salary,
+                    WorkMode = j.WorkMode,
                     RequiredEducationLevel = j.RequiredEducationLevel,
                     RequiredSkills = j.RequiredSkills,
                     Applications = j.Applications.Select(a => new Application

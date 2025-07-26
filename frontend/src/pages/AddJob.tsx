@@ -37,6 +37,8 @@ export const AddJob: React.FC = () => {
       description: formData.description,
       location: formData.location,
       salary: parseFloat(formData.salary),
+      workMode: formData.workMode,
+      jobType: formData.jobType,
       postDate: new Date().toISOString(),
       companyId: 1,
       applications: [],
@@ -124,7 +126,7 @@ export const AddJob: React.FC = () => {
 
                 <div>
                   <label htmlFor="salary" className="block text-sm font-medium text-gray-700 mb-2">
-                    Annual Salary (USD) *
+                    Monthly Salary (MAD) *
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

@@ -11,7 +11,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onClick }) => {
   const formatSalary = (salary: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'MAD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(salary);
@@ -19,6 +19,8 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onClick }) => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -68,10 +70,10 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onClick }) => {
         
         <div className="flex items-center space-x-2">
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            Full-time
+            {job.jobType}
           </span>
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            Remote
+            {job.workMode}
           </span>
         </div>
       </div>
