@@ -18,3 +18,9 @@ export const registerUser = (user: Partial<User> & { userType: string }) => {
 
 
 export const getAllUsers = () => axios.get(ENDPOINT);
+
+export const updateUser = (id: number, user: Partial<User>) =>
+  axios.put<User>(`${ENDPOINT}/${id}`, user);
+
+export const deleteUser = (id: number) =>
+  axios.delete(`${ENDPOINT}/${id}`);

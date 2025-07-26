@@ -4,8 +4,8 @@ import AdminHome from '../components/AdminHome';
 import UserManagement from '../components/UserManagement';
 import JobManagement from '../components/JobManagement';
 import CandidateProfile from '../components/CandidateProfile';
-import { getAllUsers } from '../services/userService';
-import { getAllJobs } from '../services/jobService';
+import { getAllUsers, updateUser, deleteUser } from '../services/userService';
+import { getAllJobs, updateJob, deleteJob } from '../services/jobService';
 import { getAllApplications } from '../services/applicationService';
 import { getCandidateById } from '../services/candidateService';
 
@@ -44,23 +44,51 @@ export default function AdminDashboard() {
     users: users.length
   };
 
-  const handleUpdateUser = (updatedUser: User) => {
-    setUsers(users.map(user => user.id === updatedUser.id ? updatedUser : user));
+  const handleUpdateUser = async (updatedUser: User) => {
+  try {
+    const res = await updateUser(updatedUser.id, updatedUser);
+    setUsers(users.map(user =>
+      user.id === updatedUser.id ? res.data : user
+    ));
+    alert('User updated!');
+    } catch (e) {
+        alert('Failed to update user.');
+    }
   };
 
   const handleDeleteUser = async (userId: number) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(user => user.id !== userId));
+      try {
+        await deleteUser(userId);
+        setUsers(users.filter(user => user.id !== userId));
+        alert('User deleted.');
+      } catch (e) {
+        alert('Failed to delete user.');
+      }
     }
   };
 
-  const handleUpdateJob = (updatedJob: Job ) => {
-    setJobs(jobs.map(job => job.id === updatedJob.id ? updatedJob : job));
+  const handleUpdateJob = async (updatedJob: Job) => {
+    try {
+      const res = await updateJob(updatedJob.id, updatedJob);
+      setJobs(jobs.map(job =>
+        job.id === updatedJob.id ? res.data : job
+      ));
+      alert('Job updated!');
+    } catch (e) {
+      alert('Failed to update job.');
+    }
   };
 
   const handleDeleteJob = async (jobId: number) => {
     if (window.confirm('Are you sure you want to delete this job?')) {
-      setJobs(jobs.filter(job => job.id !== jobId));
+      try {
+        await deleteJob(jobId);
+        setJobs(jobs.filter(job => job.id !== jobId));
+        alert('Job deleted.');
+      } catch (e) {
+        alert('Failed to delete job.');
+      }
     }
   };
 
