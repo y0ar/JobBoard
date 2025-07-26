@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, MapPin, Filter } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 
 interface SearchBarProps {
   onSearch: (query: string, location: string) => void;
