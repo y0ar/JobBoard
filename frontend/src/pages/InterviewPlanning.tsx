@@ -1,22 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Interview, Application } from '../types';
 import { Calendar, MapPin, User, FileText, Edit, Trash2, Plus, Search } from 'lucide-react';
+import { getAllInterviews, createInterview, updateInterview, deleteInterview } from '../services/interviewService';
+import { getAllApplications } from '../services/applicationService';
 
-interface InterviewPlanningProps {
-  interviews: Interview[];
-  applications: Application[];
-  onCreateInterview: (interview: Omit<Interview, 'id'>) => void;
-  onUpdateInterview: (interview: Interview) => void;
-  onDeleteInterview: (id: number) => void;
-}
+export default function InterviewPlanning() {
+  const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default function InterviewPlanning({ 
-  interviews, 
-  applications, 
-  onCreateInterview, 
-  onUpdateInterview, 
-  onDeleteInterview 
-}: InterviewPlanningProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingInterview, setEditingInterview] = useState<Interview | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -29,41 +21,78 @@ export default function InterviewPlanning({
     applicationId: 0
   });
 
-  const filteredInterviews = interviews.filter(interview => {
-    const application = applications.find(app => app.id === interview.applicationId);
-    const candidateName = application?.candidate ? 
-      `${application.candidate.firstName} ${application.candidate.lastName}` : '';
-    const jobTitle = application?.job?.title || '';
-    
-    return interview.interviewer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           interview.location.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([getAllInterviews(), getAllApplications()])
+      .then(([intRes, appRes]) => {
+        // console.log('interviews data:', intRes.data);
+        setInterviews(
+          Array.isArray(intRes.data)
+            ? intRes.data
+            : (intRes.data as any).interviews || []
+        );
+        setApplications(appRes.data);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  const handleCreateInterview = (e: React.FormEvent) => {
+  // CRUD handlers
+  const handleCreateInterview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newInterview.applicationId > 0) {
-      onCreateInterview(newInterview);
-      setNewInterview({
-        dateTime: '',
-        location: '',
-        interviewer: '',
-        result: '',
-        notes: '',
-        applicationId: 0
-      });
-      setShowCreateForm(false);
+      try {
+        const res = await createInterview(newInterview);
+        setInterviews([...interviews, res.data]);
+        setNewInterview({
+          dateTime: '',
+          location: '',
+          interviewer: '',
+          result: '',
+          notes: '',
+          applicationId: 0
+        });
+        setShowCreateForm(false);
+      } catch (err) {
+        alert('Failed to create interview.');
+      }
     }
   };
 
-  const handleUpdateInterview = (e: React.FormEvent) => {
+  const handleUpdateInterview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingInterview) {
-      onUpdateInterview(editingInterview);
-      setEditingInterview(null);
+      try {
+        const res = await updateInterview(editingInterview.id, editingInterview);
+        setInterviews(interviews.map(iv => iv.id === res.data.id ? res.data : iv));
+        setEditingInterview(null);
+      } catch (err) {
+        alert('Failed to update interview.');
+      }
     }
   };
+
+  const handleDeleteInterview = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this interview?')) return;
+    try {
+      await deleteInterview(id);
+      setInterviews(interviews.filter(iv => iv.id !== id));
+    } catch {
+      alert('Failed to delete interview.');
+    }
+  };
+
+  // Filtering
+  const filteredInterviews = interviews.filter(interview => {
+    const application = applications.find(app => app.id === interview.applicationId);
+    const candidateName = application?.candidate
+      ? `${application.candidate.firstName} ${application.candidate.lastName}` : '';
+    const jobTitle = application?.job?.title || '';
+
+    return interview.interviewer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      interview.location.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const formatDateTime = (dateTime: string) => {
     return new Date(dateTime).toLocaleString('en-US', {
@@ -83,6 +112,8 @@ export default function InterviewPlanning({
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div>
@@ -127,8 +158,8 @@ export default function InterviewPlanning({
                   <div className="flex items-center mb-2">
                     <User className="h-5 w-5 text-blue-600 mr-2" />
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {application?.candidate ? 
-                        `${application.candidate.firstName} ${application.candidate.lastName}` : 
+                      {application?.candidate ?
+                        `${application.candidate.firstName} ${application.candidate.lastName}` :
                         'Unknown Candidate'
                       }
                     </h3>
@@ -160,7 +191,7 @@ export default function InterviewPlanning({
                     <Edit className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => onDeleteInterview(interview.id)}
+                    onClick={() => handleDeleteInterview(interview.id)}
                     className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50"
                     title="Delete Interview"
                   >
@@ -209,7 +240,7 @@ export default function InterviewPlanning({
                   <label className="block text-sm font-medium text-gray-700 mb-1">Application</label>
                   <select
                     value={newInterview.applicationId}
-                    onChange={(e) => setNewInterview({...newInterview, applicationId: parseInt(e.target.value)})}
+                    onChange={(e) => setNewInterview({ ...newInterview, applicationId: parseInt(e.target.value) })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   >
@@ -226,7 +257,7 @@ export default function InterviewPlanning({
                   <input
                     type="datetime-local"
                     value={newInterview.dateTime}
-                    onChange={(e) => setNewInterview({...newInterview, dateTime: e.target.value})}
+                    onChange={(e) => setNewInterview({ ...newInterview, dateTime: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
@@ -236,7 +267,7 @@ export default function InterviewPlanning({
                   <input
                     type="text"
                     value={newInterview.location}
-                    onChange={(e) => setNewInterview({...newInterview, location: e.target.value})}
+                    onChange={(e) => setNewInterview({ ...newInterview, location: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Office, Video call, etc."
                     required
@@ -247,7 +278,7 @@ export default function InterviewPlanning({
                   <input
                     type="text"
                     value={newInterview.interviewer}
-                    onChange={(e) => setNewInterview({...newInterview, interviewer: e.target.value})}
+                    onChange={(e) => setNewInterview({ ...newInterview, interviewer: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Interviewer name"
                     required
@@ -257,7 +288,7 @@ export default function InterviewPlanning({
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
                   <textarea
                     value={newInterview.notes}
-                    onChange={(e) => setNewInterview({...newInterview, notes: e.target.value})}
+                    onChange={(e) => setNewInterview({ ...newInterview, notes: e.target.value })}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Additional notes or preparation details"
@@ -296,7 +327,7 @@ export default function InterviewPlanning({
                   <input
                     type="datetime-local"
                     value={editingInterview.dateTime}
-                    onChange={(e) => setEditingInterview({...editingInterview, dateTime: e.target.value})}
+                    onChange={(e) => setEditingInterview({ ...editingInterview, dateTime: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
@@ -306,7 +337,7 @@ export default function InterviewPlanning({
                   <input
                     type="text"
                     value={editingInterview.location}
-                    onChange={(e) => setEditingInterview({...editingInterview, location: e.target.value})}
+                    onChange={(e) => setEditingInterview({ ...editingInterview, location: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
@@ -316,7 +347,7 @@ export default function InterviewPlanning({
                   <input
                     type="text"
                     value={editingInterview.interviewer}
-                    onChange={(e) => setEditingInterview({...editingInterview, interviewer: e.target.value})}
+                    onChange={(e) => setEditingInterview({ ...editingInterview, interviewer: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
@@ -325,7 +356,7 @@ export default function InterviewPlanning({
                   <label className="block text-sm font-medium text-gray-700 mb-1">Result</label>
                   <select
                     value={editingInterview.result}
-                    onChange={(e) => setEditingInterview({...editingInterview, result: e.target.value})}
+                    onChange={(e) => setEditingInterview({ ...editingInterview, result: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select result</option>
@@ -338,7 +369,7 @@ export default function InterviewPlanning({
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                   <textarea
                     value={editingInterview.notes}
-                    onChange={(e) => setEditingInterview({...editingInterview, notes: e.target.value})}
+                    onChange={(e) => setEditingInterview({ ...editingInterview, notes: e.target.value })}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />

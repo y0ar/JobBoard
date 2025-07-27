@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, LogIn, UserPlus, Briefcase, LogOut, LayoutDashboard, Bell } from 'lucide-react';
+import { Plus, LogIn, UserPlus, Briefcase, LogOut, LayoutDashboard, Bell, CalendarClock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -57,6 +57,12 @@ export const Header: React.FC = () => {
               <Link to="/add-job" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Post Job
+              </Link>
+            )}
+            {(isCandidate || isRecruiter) && (
+              <Link to={"/interview-planning"} className="inline-flex items-center px-4 py-2 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200">
+                <CalendarClock className="h-4 w-4 mr-2" />
+                Interviews
               </Link>
             )}
           </nav>

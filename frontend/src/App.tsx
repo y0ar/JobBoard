@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './contexts/AuthContext';
 import AdminDashboard from './pages/AdminDashboard';
 import CandidateProfile from './components/CandidateProfile';
+import InterviewPlanning from './pages/InterviewPlanning';
 
 const Companies = () => <div>Companies Page</div>;
 const About = () => <div>About Page</div>;
@@ -30,6 +31,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="admin-dashboard" element={<AdminDashboard />} />
             <Route path="/candidate-profile/:id" element={<CandidateProfile />} />
+            <Route path="/interview-planning" element={<InterviewPlanning />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
