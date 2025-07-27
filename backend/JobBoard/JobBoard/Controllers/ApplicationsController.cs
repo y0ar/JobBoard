@@ -79,16 +79,33 @@ namespace JobBoard.Controllers
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] string newStatus)
         {
-            var application = await _context.Applications.FindAsync(id);
+            var application = await _context.Applications
+                .Include(a => a.Candidate)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (application == null)
                 return NotFound();
 
             application.Status = newStatus;
+
+            if (application.CandidateId != 0)
+            {
+                var alert = new JobAlert
+                {
+                    Keywords = $"Application status changed to {newStatus}",
+                    Location = "",
+                    AlertType = "ApplicationStatusChanged",
+                    Frequency = "once",
+                    CandidateId = application.CandidateId
+                };
+                _context.JobAlerts.Add(alert);
+            }
+
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
 
 
         // POST: api/Applications
@@ -97,6 +114,15 @@ namespace JobBoard.Controllers
         public async Task<ActionResult<Application>> PostApplication(Application application)
         {
             _context.Applications.Add(application);
+            var jobAlert = new JobAlert
+            {
+                CandidateId = application.CandidateId,
+                AlertType = "statusChange",
+                Keywords = "",
+                Location = application.Job?.Location ?? "",
+                Frequency = "",
+            };
+            _context.JobAlerts.Add(jobAlert);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetApplication", new { id = application.Id }, application);

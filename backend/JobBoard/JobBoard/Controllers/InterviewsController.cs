@@ -79,6 +79,20 @@ namespace JobBoard.Controllers
         public async Task<ActionResult<Interview>> PostInterview(Interview interview)
         {
             _context.Interviews.Add(interview);
+            var application = await _context.Applications.FindAsync(interview.ApplicationId);
+            if (application != null)
+            {
+                var jobAlert = new JobAlert
+                {
+                    CandidateId = application.CandidateId,
+                    AlertType = "interview",
+                    Keywords = "",
+                    Location = interview.Location ?? "",
+                    Frequency = "",
+                };
+                _context.JobAlerts.Add(jobAlert);
+            }
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetInterview", new { id = interview.Id }, interview);

@@ -42,6 +42,17 @@ namespace JobBoard.Controllers
             return jobAlert;
         }
 
+        // GET: api/JobAlerts/candidate/5
+        [HttpGet("candidate/{candidateId}")]
+        public async Task<ActionResult<IEnumerable<JobAlert>>> GetJobAlertsByCandidate(int candidateId)
+        {
+            var alerts = await _context.JobAlerts
+                .Where(a => a.CandidateId == candidateId)
+                .ToListAsync();
+
+            return alerts;
+        }
+
         // PUT: api/JobAlerts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

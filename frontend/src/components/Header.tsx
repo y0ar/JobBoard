@@ -1,22 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, LogIn, UserPlus, Briefcase, LogOut, LayoutDashboard, Bell, CalendarClock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-
-// Dummy jobAlerts for now; replace with your state/service.
-const jobAlerts: any[] = [
-  // Example: { id: 1, keyword: "React", location: "Remote", candidateId: 42 }
-];
+import { getJobAlertsByCandidateId } from '../services/jobAlertService';
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // TODO: Replace jobAlerts and onMarkAsRead with real service/props as you need.
+  const [jobAlerts, setJobAlerts] = useState<any[]>([]);
+  const [loadingAlerts, setLoadingAlerts] = useState(false);
+
+  useEffect(() => {
+    // Only fetch if candidate is logged in
+    if (user && user.userType?.toLowerCase() === 'candidate') {
+      setLoadingAlerts(true);
+      getJobAlertsByCandidateId(user.id)
+        .then(res => setJobAlerts(res.data))
+        .finally(() => setLoadingAlerts(false));
+    } else {
+      setJobAlerts([]);
+    }
+  }, [user]);
+
   const unreadCount = jobAlerts.length;
+
   const onMarkAsRead = (alertId: number) => {
-    // Implement this function to mark notification as read in your app.
+    setJobAlerts(alerts => alerts.filter(alert => alert.id !== alertId));
   };
 
   const handleLogout = () => {
@@ -89,22 +100,33 @@ export const Header: React.FC = () => {
                   <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="p-4 border-b border-gray-200">
                       <h3 className="text-lg font-semibold text-gray-900">Job Alerts</h3>
-                      <p className="text-sm text-gray-600">{unreadCount} new alerts</p>
+                      {loadingAlerts
+                        ? <p className="text-sm text-gray-600">Loading...</p>
+                        : <p className="text-sm text-gray-600">{unreadCount} new alerts</p>
+                      }
                     </div>
                     <div className="max-h-96 overflow-y-auto">
-                      {jobAlerts.length > 0 ? (
+                      {!loadingAlerts && jobAlerts.length > 0 ? (
                         jobAlerts.map((alert) => (
                           <div key={alert.id} className="p-4 border-b border-gray-100 hover:bg-gray-50">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
                                 <p className="text-sm font-medium text-gray-900">
-                                  New job matching: "{alert.keyword}"
+                                  {/* Use AlertType to show the type of notification */}
+                                  {alert.alertType === "interview"
+                                    ? "Interview scheduled"
+                                    : alert.alertType === "statusChange"
+                                      ? "Application status updated"
+                                      : "Job alert"}
                                 </p>
-                                <p className="text-sm text-gray-600 mt-1">
-                                  Location: {alert.location}
-                                </p>
+                                {/* Extra info, if available */}
+                                {alert.location && (
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    Location: {alert.location}
+                                  </p>
+                                )}
                                 <p className="text-xs text-gray-500 mt-2">
-                                  Candidate ID: {alert.candidateId}
+                                  Alert ID: {alert.id}
                                 </p>
                               </div>
                               <button
@@ -117,10 +139,12 @@ export const Header: React.FC = () => {
                           </div>
                         ))
                       ) : (
-                        <div className="p-8 text-center">
-                          <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                          <p className="text-gray-500">No job alerts</p>
-                        </div>
+                        !loadingAlerts && (
+                          <div className="p-8 text-center">
+                            <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                            <p className="text-gray-500">No job alerts</p>
+                          </div>
+                        )
                       )}
                     </div>
                   </div>
