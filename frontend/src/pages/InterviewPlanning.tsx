@@ -3,8 +3,10 @@ import type { Interview, Application } from '../types';
 import { Calendar, MapPin, User, FileText, Edit, Trash2, Plus, Search } from 'lucide-react';
 import { getAllInterviews, createInterview, updateInterview, deleteInterview } from '../services/interviewService';
 import { getAllApplications } from '../services/applicationService';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function InterviewPlanning() {
+  const { user } = useAuth();
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,6 @@ export default function InterviewPlanning() {
     setLoading(true);
     Promise.all([getAllInterviews(), getAllApplications()])
       .then(([intRes, appRes]) => {
-        // console.log('interviews data:', intRes.data);
         setInterviews(
           Array.isArray(intRes.data)
             ? intRes.data
@@ -36,7 +37,31 @@ export default function InterviewPlanning() {
       .finally(() => setLoading(false));
   }, []);
 
-  // CRUD handlers
+  // =========== Restrict interviews to only relevant to the current user ============
+  // Candidates see only their interviews; others see all
+  let visibleInterviews = interviews;
+  if (user?.userType?.toLowerCase() === 'candidate') {
+    // Find all application IDs belonging to this candidate
+    const candidateAppIds = applications
+      .filter(app => app.candidateId === user.id)
+      .map(app => app.id);
+    visibleInterviews = interviews.filter(iv => candidateAppIds.includes(iv.applicationId));
+  }
+
+  // Filtering
+  const filteredInterviews = visibleInterviews.filter(interview => {
+    const application = applications.find(app => app.id === interview.applicationId);
+    const candidateName = application?.candidate
+      ? `${application.candidate.firstName} ${application.candidate.lastName}` : '';
+    const jobTitle = application?.job?.title || '';
+
+    return interview.interviewer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      interview.location.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
+  // CRUD handlers...
   const handleCreateInterview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newInterview.applicationId > 0) {
@@ -81,19 +106,6 @@ export default function InterviewPlanning() {
     }
   };
 
-  // Filtering
-  const filteredInterviews = interviews.filter(interview => {
-    const application = applications.find(app => app.id === interview.applicationId);
-    const candidateName = application?.candidate
-      ? `${application.candidate.firstName} ${application.candidate.lastName}` : '';
-    const jobTitle = application?.job?.title || '';
-
-    return interview.interviewer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      interview.location.toLowerCase().includes(searchTerm.toLowerCase());
-  });
-
   const formatDateTime = (dateTime: string) => {
     return new Date(dateTime).toLocaleString('en-US', {
       year: 'numeric',
@@ -115,6 +127,9 @@ export default function InterviewPlanning() {
 
   if (loading) return <div>Loading...</div>;
 
+  // Restrict scheduling/editing/deleting to only non-candidates
+  const isCandidate = user?.userType?.toLowerCase() === 'candidate';
+
   return (
     <div>
       <div className="mb-8">
@@ -123,13 +138,15 @@ export default function InterviewPlanning() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Interview Planning</h1>
             <p className="text-gray-600">Manage and schedule interviews for applications</p>
           </div>
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Schedule Interview
-          </button>
+          {!isCandidate && (
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Schedule Interview
+            </button>
+          )}
         </div>
       </div>
 
@@ -182,22 +199,24 @@ export default function InterviewPlanning() {
                     </div>
                   </div>
                 </div>
-                <div className="flex space-x-2 ml-4">
-                  <button
-                    onClick={() => setEditingInterview(interview)}
-                    className="text-indigo-600 hover:text-indigo-900 p-2 rounded-lg hover:bg-indigo-50"
-                    title="Edit Interview"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteInterview(interview.id)}
-                    className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50"
-                    title="Delete Interview"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+                {!isCandidate && (
+                  <div className="flex space-x-2 ml-4">
+                    <button
+                      onClick={() => setEditingInterview(interview)}
+                      className="text-indigo-600 hover:text-indigo-900 p-2 rounded-lg hover:bg-indigo-50"
+                      title="Edit Interview"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteInterview(interview.id)}
+                      className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50"
+                      title="Delete Interview"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {interview.result && (
@@ -230,7 +249,7 @@ export default function InterviewPlanning() {
       )}
 
       {/* Create Interview Modal */}
-      {showCreateForm && (
+      {!isCandidate && showCreateForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Schedule New Interview</h2>
@@ -316,7 +335,7 @@ export default function InterviewPlanning() {
       )}
 
       {/* Edit Interview Modal */}
-      {editingInterview && (
+      {!isCandidate && editingInterview && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Edit Interview</h2>
