@@ -61,12 +61,15 @@ export default function InterviewPlanning() {
       interview.location.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  // CRUD handlers...
   const handleCreateInterview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newInterview.applicationId > 0) {
       try {
-        const res = await createInterview(newInterview);
+        const toSend = {
+          ...newInterview,
+          result: newInterview.result?.trim() ? newInterview.result : 'pending'
+        };
+        const res = await createInterview(toSend);
         setInterviews([...interviews, res.data]);
         setNewInterview({
           dateTime: '',
@@ -82,6 +85,7 @@ export default function InterviewPlanning() {
       }
     }
   };
+
 
   const handleUpdateInterview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,6 +133,12 @@ export default function InterviewPlanning() {
 
   // Restrict scheduling/editing/deleting to only non-candidates
   const isCandidate = user?.userType?.toLowerCase() === 'candidate';
+
+  const resultLabels: Record<string, string> = {
+    pending: 'Pending',
+    passed: 'Passed',
+    failed: 'Failed',
+  };
 
   return (
     <div>
@@ -222,7 +232,7 @@ export default function InterviewPlanning() {
               {interview.result && (
                 <div className="mb-3">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getResultColor(interview.result)}`}>
-                    {interview.result}
+                    {resultLabels[interview.result.toLowerCase()] || interview.result}
                   </span>
                 </div>
               )}
