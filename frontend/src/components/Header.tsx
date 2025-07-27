@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, LogIn, UserPlus, Briefcase, LogOut, LayoutDashboard, Bell, CalendarClock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getJobAlertsByCandidateId } from '../services/jobAlertService';
+import { getJobAlertsByCandidateId, deleteJobAlert } from '../services/jobAlertService';
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -26,8 +26,13 @@ export const Header: React.FC = () => {
 
   const unreadCount = jobAlerts.length;
 
-  const onMarkAsRead = (alertId: number) => {
-    setJobAlerts(alerts => alerts.filter(alert => alert.id !== alertId));
+  const onMarkAsRead = async (alertId: number) => {
+    try {
+      await deleteJobAlert(alertId);
+      setJobAlerts(alerts => alerts.filter(alert => alert.id !== alertId));
+    } catch (err) {
+      alert("Failed to mark alert as read. Please try again.");
+    }
   };
 
   const handleLogout = () => {
